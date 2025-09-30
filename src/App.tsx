@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./App.css";
+import styles from "./App.module.scss";
 import { Header } from "./components/Header";
 import { ControlsBar } from "./components/ControlsBar";
 import type { ControlsState } from "./components/ControlsBar";
@@ -14,14 +15,7 @@ function App() {
   });
 
   return (
-    <div
-      style={{
-        minHeight: "100dvh",
-        color: "white",
-        background: "radial-gradient(1200px 600px at 50% -10%, #1a1a22 0%, #0b0b0f 60%, #050507 100%)",
-        overflowX: "hidden" // sin scroll lateral
-      }}
-    >
+    <div className={styles.app}>
       <Header />
       <ControlsBar state={controls} onChange={(next) => setControls({ ...controls, ...next })} />
       <GameCanvas controls={controls} />

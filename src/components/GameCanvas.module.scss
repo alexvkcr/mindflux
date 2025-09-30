@@ -1,0 +1,17 @@
+.wrapper {
+  display: grid;
+  justify-content: start;
+  place-items: center;
+  padding: 16px 20px;
+}
+
+.canvas {
+  width: min(500px, calc(100vw - 40px));
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(135deg, #111 0%, #1b1b1f 100%);
+  border: 1px solid #2a2a2f;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px #0d0d10 inset, 0 6px 30px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}

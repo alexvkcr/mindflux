@@ -1,0 +1,14 @@
+.container {
+  position: absolute;
+  inset: 0;
+}
+
+.dot {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #5fd5ff 0%, #3aa9ff 40%, #1a6bff 100%);
+  box-shadow: 0 0 12px rgba(58, 169, 255, 0.75);
+  transform: translate3d(0, 0, 0);
+}

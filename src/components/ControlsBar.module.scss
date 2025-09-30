@@ -1,0 +1,32 @@
+.controlsBar {
+  display: flex;
+  gap: 12px;
+  padding: 10px 20px;
+  overflow-x: auto;
+  align-items: center;
+  border-top: 1px solid #222;
+  border-bottom: 1px solid #222;
+}
+
+.controlGroup {
+  min-width: 220px;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.select {
+  width: 100%;
+  padding: 8px 10px;
+  background: #0e0e10;
+  color: white;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+
+.range {
+  width: 100%;
+}
