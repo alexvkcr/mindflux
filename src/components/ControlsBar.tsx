@@ -1,5 +1,6 @@
 import { t } from "../i18n";
 import styles from "./ControlsBar.module.scss";
+import { PrimaryButton } from "./ui/PrimaryButton";
 
 export type CategoryKey = "eyeMovement";
 export type GameKey = "basic";
@@ -8,6 +9,7 @@ export type ControlsState = {
   category: CategoryKey;
   game: GameKey;
   level: number; // 1..9
+  running: boolean;
 };
 
 export function ControlsBar(props: {
@@ -55,6 +57,16 @@ export function ControlsBar(props: {
           value={state.level}
           onChange={(e) => onChange({ level: Number(e.target.value) })}
         />
+      </div>
+
+      {/* Botón Arranque/Parar */}
+      <div className={styles.actionButton}>
+        <PrimaryButton
+          onClick={() => onChange({ running: !state.running })}
+          aria-pressed={state.running}
+        >
+          {state.running ? t.controls.stop : t.controls.start}
+        </PrimaryButton>
       </div>
     </section>
   );

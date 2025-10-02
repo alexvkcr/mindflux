@@ -1,0 +1,31 @@
+@use 'variables' as *;
+@use 'mixins' as mix;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: radial-gradient(1200px 600px at 50% -10%, $bg-2 0%, $bg-1 60%, $bg-0 100%);
+  color: $text;
+  overflow-x: hidden;
+}
+
+.board {
+  @include mix.panel;
+  position: relative;
+  overflow: hidden;
+}

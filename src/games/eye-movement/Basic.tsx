@@ -5,7 +5,7 @@ import styles from "./Basic.module.scss";
  * Un circulo que salta a posiciones aleatorias cada X ms en funcion del nivel (1..9).
  * Nivel 1 = 1000ms, nivel 9 = 200ms (lineal).
  */
-export function EyeMovementBasic({ level }: { level: number }) {
+export function EyeMovementBasic({ level, running }: { level: number; running: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -27,10 +27,12 @@ export function EyeMovementBasic({ level }: { level: number }) {
   }, [size]);
 
   useEffect(() => {
-    moveRandom(); // posicion inicial
-    const id = setInterval(moveRandom, intervalMs);
-    return () => clearInterval(id);
-  }, [moveRandom, intervalMs]);
+    if (running) {
+      moveRandom(); // posicion inicial
+      const id = setInterval(moveRandom, intervalMs);
+      return () => clearInterval(id);
+    }
+  }, [moveRandom, intervalMs, running]);
 
   useEffect(() => {
     const dot = dotRef.current;

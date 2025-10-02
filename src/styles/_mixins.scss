@@ -1,0 +1,19 @@
+@use 'variables' as *;
+
+@mixin panel {
+  background: linear-gradient(135deg, $bg-1 0%, color.mix($bg-1, $bg-2, 50%) 100%);
+  border: 1px solid $border;
+  border-radius: $radius;
+  box-shadow: $shadow-inner, $shadow-outer;
+}
+
+@mixin container {
+  padding: 16px 20px;
+}
+
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
+  }
+}

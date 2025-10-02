@@ -1,11 +1,14 @@
+@use '../styles/variables' as *;
+@use '../styles/colors' as colors;
+
 .controlsBar {
   display: flex;
   gap: 12px;
   padding: 10px 20px;
   overflow-x: auto;
   align-items: center;
-  border-top: 1px solid #222;
-  border-bottom: 1px solid #222;
+  border-top: 1px solid $border;
+  border-bottom: 1px solid $border;
 }
 
 .controlGroup {
@@ -21,10 +24,15 @@
 .select {
   width: 100%;
   padding: 8px 10px;
-  background: #0e0e10;
-  color: white;
-  border: 1px solid #333;
-  border-radius: 8px;
+  background: $bg-1;
+  color: $text;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  cursor: pointer;
+
+  &:hover {
+    border-color: colors.lighten($border, 10%);
+  }
 }
 
 .range {

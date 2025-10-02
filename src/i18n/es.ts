@@ -15,6 +15,8 @@ export const es = {
     },
     games: {
       basic: "Básico"
-    }
+    },
+    start: "Arranque",
+    stop: "Alto"
   }
 };

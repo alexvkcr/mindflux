@@ -1,0 +1,22 @@
+@use 'sass:color';
+
+// Colors
+$bg-0: #050507;
+$bg-1: #0b0b0f;
+$bg-2: #1a1a22;
+$border: #2a2a2f;
+$text: #ffffff;
+$text-dim: #b9b9c5;
+$primary: #3aa9ff;
+$primary-dim: #1a6bff;
+
+// Dimensions
+$radius: 12px;
+$radius-sm: 8px;
+
+// Shadows
+$shadow-inner: 0 0 0 1px #0d0d10 inset;
+$shadow-outer: 0 6px 30px rgba(0, 0, 0, 0.35);
+
+// Breakpoints
+$mobile: 768px;

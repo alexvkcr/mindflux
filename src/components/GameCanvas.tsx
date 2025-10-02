@@ -7,7 +7,7 @@ export function GameCanvas({ controls }: { controls: ControlsState }) {
     <section className={styles.wrapper}>
       <div className={styles.canvas}>
         {controls.category === "eyeMovement" && controls.game === "basic" ? (
-          <EyeMovementBasic level={controls.level} />
+          <EyeMovementBasic level={controls.level} running={controls.running} />
         ) : null}
       </div>
     </section>
