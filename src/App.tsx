@@ -30,7 +30,10 @@ function App() {
     <div className={styles.app}>
       <Header />
       <ControlsBar state={controls} onChange={(next) => setControls({ ...controls, ...next })} />
-      <GameCanvas controls={controls} />
+      <GameCanvas 
+        controls={controls} 
+        onChange={(next) => setControls({ ...controls, ...next })}
+      />
       <Info />
     </div>
   );

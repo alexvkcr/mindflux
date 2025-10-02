@@ -1,49 +1,74 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styles from "./Basic.module.scss";
 
 /**
  * Un circulo que salta a posiciones aleatorias cada X ms en funcion del nivel (1..9).
  * Nivel 1 = 1000ms, nivel 9 = 200ms (lineal).
  */
-export function EyeMovementBasic({ level, running }: { level: number; running: boolean }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const dotRef = useRef<HTMLDivElement>(null);
+type Props = {
+  level: number;
+  running: boolean;
+  boardW: number;
+  boardH: number;
+  onTimeout: () => void;
+};
+
+export function EyeMovementBasic({ 
+  level, 
+  running,
+  boardW,
+  boardH,
+  onTimeout 
+}: Props) {
   const [pos, setPos] = useState({ x: 0, y: 0 });
-  const size = 24; // diametro del circulo en px (simple, puede ser selector luego)
+  const size = 24; // diametro del circulo
+  const margin = 8; // seguridad contra borde
 
   const intervalMs = Math.max(200, 1000 - (level - 1) * 100);
 
   const moveRandom = useCallback(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const rect = el.getBoundingClientRect();
-    const maxX = rect.width - size - 8; // margen de seguridad
-    const maxY = rect.height - size - 8;
-
-    const x = Math.max(4, Math.floor(Math.random() * (maxX - 4 + 1)));
-    const y = Math.max(4, Math.floor(Math.random() * (maxY - 4 + 1)));
+    const maxX = Math.max(4, boardW - size - margin);
+    const maxY = Math.max(4, boardH - size - margin);
+    const x = Math.floor(Math.random() * maxX);
+    const y = Math.floor(Math.random() * maxY);
     setPos({ x, y });
-  }, [size]);
+  }, [boardW, boardH]);
 
+  // Efecto principal para intervalos y timeout
   useEffect(() => {
     if (running) {
       moveRandom(); // posicion inicial
-      const id = setInterval(moveRandom, intervalMs);
-      return () => clearInterval(id);
-    }
-  }, [moveRandom, intervalMs, running]);
+      const intervalId = setInterval(moveRandom, intervalMs);
+      const timeoutId = setTimeout(onTimeout, 30000);
 
+      return () => {
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [moveRandom, intervalMs, running, onTimeout]);
+
+  // Reposicionar cuando cambien las dimensiones
   useEffect(() => {
-    const dot = dotRef.current;
-    if (!dot) return;
-    dot.style.left = `${pos.x}px`;
-    dot.style.top = `${pos.y}px`;
-  }, [pos]);
+    if (running) {
+      moveRandom();
+    }
+  }, [boardW, boardH, running, moveRandom]);
 
   return (
-    <div ref={containerRef} className={styles.container}>
-      <div aria-label="target-dot" ref={dotRef} className={styles.dot} />
+    <div className={styles.container}>
+      {running && (
+        <div 
+          aria-label="target-circle" 
+          className={styles.circle}
+          style={{
+            left: pos.x,
+            top: pos.y,
+            width: size,
+            height: size
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -21,7 +21,7 @@ export function ControlsBar(props: {
   return (
     <section className={styles.controlsBar}>
       {/* Categoria unica, por defecto */}
-      <div className={styles.controlGroup}>
+      <div className={styles.control}>
         <label className={styles.label}>{t.controls.categoryLabel}</label>
         <select
           className={styles.select}
@@ -33,7 +33,7 @@ export function ControlsBar(props: {
       </div>
 
       {/* Juego unico dentro de la categoria */}
-      <div className={styles.controlGroup}>
+      <div className={styles.control}>
         <label className={styles.label}>{t.controls.gameLabel}</label>
         <select
           className={styles.select}
@@ -45,7 +45,7 @@ export function ControlsBar(props: {
       </div>
 
       {/* Nivel 1..9 */}
-      <div className={styles.controlGroup}>
+      <div className={styles.level}>
         <label className={styles.label}>
           {t.controls.levelLabel}: {state.level}
         </label>
@@ -60,8 +60,9 @@ export function ControlsBar(props: {
       </div>
 
       {/* Botón Arranque/Parar */}
-      <div className={styles.actionButton}>
+      <div className={styles.action}>
         <PrimaryButton
+          className={styles.button}
           onClick={() => onChange({ running: !state.running })}
           aria-pressed={state.running}
         >
