@@ -1,6 +1,7 @@
 import { useRef, useState, useLayoutEffect, useCallback } from "react";
 import type { ControlsState } from "./ControlsBar";
 import { EyeMovementBasic } from "../games/eye-movement/Basic";
+import { EyeMovementIsoDistance } from "../games/eye-movement/IsoDistance";
 import styles from "./GameCanvas.module.scss";
 
 export function GameCanvas({ 
@@ -63,15 +64,26 @@ export function GameCanvas({
   return (
     <section ref={wrapRef} className={styles.wrap}>
       <div className={styles.board} style={{ width: boardW, height: boardH }}>
-        {controls.category === "eyeMovement" && controls.game === "basic" ? (
-          <EyeMovementBasic 
-            level={controls.level} 
-            running={controls.running}
-            boardW={boardW}
-            boardH={boardH}
-            onTimeout={() => onChange({ running: false })}
-          />
-        ) : null}
+        {controls.category === "eyeMovement" && (
+          controls.game === "basic" ? (
+            <EyeMovementBasic 
+              level={controls.level} 
+              running={controls.running}
+              boardW={boardW}
+              boardH={boardH}
+              onTimeout={() => onChange({ running: false })}
+            />
+          ) : controls.game === "isoDistance" ? (
+            <EyeMovementIsoDistance
+              distance={controls.distance ?? 3}
+              level={controls.level}
+              running={controls.running}
+              boardW={boardW}
+              boardH={boardH}
+              onTimeout={() => onChange({ running: false })}
+            />
+          ) : null
+        )}
       </div>
     </section>
   );

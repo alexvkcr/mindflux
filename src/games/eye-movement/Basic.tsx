@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./Basic.module.scss";
+import { getIntervalMs } from "../utils/speed";
 
 /**
  * Un circulo que salta a posiciones aleatorias cada X ms en funcion del nivel (1..9).
@@ -24,7 +25,7 @@ export function EyeMovementBasic({
   const size = 24; // diametro del circulo
   const margin = 8; // seguridad contra borde
 
-  const intervalMs = Math.max(200, 1000 - (level - 1) * 100);
+  const intervalMs = getIntervalMs(level);
 
   const moveRandom = useCallback(() => {
     const maxX = Math.max(4, boardW - size - margin);
@@ -34,19 +35,41 @@ export function EyeMovementBasic({
     setPos({ x, y });
   }, [boardW, boardH]);
 
+  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const killerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Efecto principal para intervalos y timeout
   useEffect(() => {
-    if (running) {
-      moveRandom(); // posicion inicial
-      const intervalId = setInterval(moveRandom, intervalMs);
-      const timeoutId = setTimeout(onTimeout, 30000);
+    if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
+    if (killerRef.current) { clearTimeout(killerRef.current); killerRef.current = null; }
 
-      return () => {
-        clearInterval(intervalId);
-        clearTimeout(timeoutId);
-      };
-    }
+    if (!running) return;
+
+    // posicion inicial y primer salto inmediato
+    moveRandom();
+
+    tickRef.current = setInterval(moveRandom, intervalMs);
+    killerRef.current = setTimeout(onTimeout, 30000);
+
+    return () => {
+      if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
+      if (killerRef.current) { clearTimeout(killerRef.current); killerRef.current = null; }
+    };
   }, [moveRandom, intervalMs, running, onTimeout]);
+
+  // Control de pausa en background
+  useEffect(() => {
+    const onVis = () => {
+      if (document.hidden && tickRef.current) {
+        clearInterval(tickRef.current);
+        tickRef.current = null;
+      } else if (!document.hidden && running && !tickRef.current) {
+        tickRef.current = setInterval(moveRandom, intervalMs);
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, [running, intervalMs, moveRandom]);
 
   // Reposicionar cuando cambien las dimensiones
   useEffect(() => {

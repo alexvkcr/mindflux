@@ -25,6 +25,8 @@
 }
 
 .action {
+  display: flex;
+  justify-content: flex-end;
   flex: 1 1 220px;
 }
 
@@ -34,8 +36,13 @@
   opacity: 0.8;
 }
 
-.select, .range, .button {
+.select, .range {
   width: 100%;
+}
+
+.button {
+  max-width: 200px;
+  flex: 0 0 auto;
 }
 
 .select {
@@ -55,6 +62,10 @@
   .control, .level, .action {
     flex: 1 1 100%;
     min-width: 0;
+  }
+  
+  .action {
+    justify-content: center;
   }
 }
 

@@ -14,9 +14,11 @@ export const es = {
       eyeMovement: "Movimiento Del Ojo"
     },
     games: {
-      basic: "Básico"
+      basic: "Básico",
+      isoDistance: "Seguimiento Isodistancia"
     },
     start: "Arranque",
-    stop: "Alto"
+    stop: "Alto",
+    distanceLabel: "Distancia"
   }
 };

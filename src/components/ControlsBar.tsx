@@ -3,13 +3,14 @@ import styles from "./ControlsBar.module.scss";
 import { PrimaryButton } from "./ui/PrimaryButton";
 
 export type CategoryKey = "eyeMovement";
-export type GameKey = "basic";
+export type GameKey = "basic" | "isoDistance";
 
 export type ControlsState = {
   category: CategoryKey;
   game: GameKey;
   level: number; // 1..9
   running: boolean;
+  distance?: number; // 1..9 solo aplica a isoDistance
 };
 
 export function ControlsBar(props: {
@@ -41,8 +42,26 @@ export function ControlsBar(props: {
           onChange={(e) => onChange({ game: e.target.value as GameKey })}
         >
           <option value="basic">{t.controls.games.basic}</option>
+          <option value="isoDistance">{t.controls.games.isoDistance}</option>
         </select>
       </div>
+
+      {/* Distancia 1..9 (solo para isoDistance) */}
+      {state.game === "isoDistance" && (
+        <div className={styles.level}>
+          <label className={styles.label}>
+            {t.controls.distanceLabel}: {state.distance ?? 3}
+          </label>
+          <input
+            type="range"
+            min={1}
+            max={9}
+            value={state.distance ?? 3}
+            onChange={(e) => onChange({ distance: Number(e.target.value) })}
+            className={styles.range}
+          />
+        </div>
+      )}
 
       {/* Nivel 1..9 */}
       <div className={styles.level}>
