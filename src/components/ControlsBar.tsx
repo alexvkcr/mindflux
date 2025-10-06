@@ -1,4 +1,4 @@
-import { ChangeEvent } from "react";
+import type { ChangeEvent } from "react";
 import { t } from "../i18n";
 import styles from "./ControlsBar.module.scss";
 import { PrimaryButton } from "./ui/PrimaryButton";
