@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import styles from './FixedReading.module.scss';
 import { texts } from './texts';
@@ -18,6 +18,10 @@ interface Props {
 }
 
 const DEFAULT_WIDTH_IDX: WidthIndex = 3;
+
+function clampLevel(level: number): number {
+  return Math.min(9, Math.max(1, level));
+}
 
 export function FixedReading({
   book,
@@ -45,7 +49,7 @@ export function FixedReading({
   }, [selBook]);
 
   const clampedLevel = useMemo(() => {
-    return Math.min(9, Math.max(1, selLevel));
+    return clampLevel(selLevel);
   }, [selLevel]);
 
   const { currentLine, currentIndex, totalLines, reset } = useFixedReadingEngine({
@@ -62,7 +66,7 @@ export function FixedReading({
       level: number;
       widthIdx: WidthIndex;
     }) => {
-      const safeLevel = Math.min(9, Math.max(1, nextLevel));
+      const safeLevel = clampLevel(nextLevel);
       const nextCharWidth = WIDTH_MAP[nextWidthIdx];
       const nextText = (texts[nextBook] ?? []).map((fragment) => fragment.text).join('\n\n');
 
@@ -94,7 +98,7 @@ export function FixedReading({
       </div>
 
       <div className={styles.textArea}>
-        <ReadingViewport line={currentLine} charWidth={charWidth} />
+        <ReadingViewport line={currentLine}/>
       </div>
 
       <div className={styles.status} data-testid="reading-progress">
@@ -103,3 +107,4 @@ export function FixedReading({
     </div>
   );
 }
+

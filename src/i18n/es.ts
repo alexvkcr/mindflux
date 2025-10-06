@@ -11,11 +11,19 @@ export const es = {
     gameLabel: "Juego",
     levelLabel: "Nivel",
     categories: {
-      eyeMovement: "Movimiento Del Ojo"
+      eyeMovement: "Movimiento Del Ojo",
+      speedReading: "Lectura Rápida"
     },
     games: {
       basic: "Básico",
-      isoDistance: "Seguimiento Isodistancia"
+      isoDistance: "Seguimiento Isodistancia",
+      fixedReading: "Lectura Fija"
+    },
+    bookLabel: "Texto",
+    books: {
+      quijote: "Don Quijote de la Mancha",
+      regenta: "La Regenta",
+      colmena: "La Colmena"
     },
     start: "Arranque",
     stop: "Alto",

@@ -1,8 +1,9 @@
 import { useRef, useState, useLayoutEffect, useCallback } from "react";
 import type { ControlsState } from "./ControlsBar";
 import { EyeMovementBasic } from "../games/eye-movement/Basic";
-import { EyeMovementIsoDistance } from "../games/eye-movement/IsoDistance";
+import { FixedReading } from "../games/speed-reading/FixedReading";
 import styles from "./GameCanvas.module.scss";
+import { EyeMovementIsoDistance } from "../games/eye-movement/IsoDistance";
 
 export function GameCanvas({ 
   controls,
@@ -83,6 +84,16 @@ export function GameCanvas({
               onTimeout={() => onChange({ running: false })}
             />
           ) : null
+        )}
+        {controls.category === "speedReading" && controls.game === "fixedReading" && (
+          <FixedReading
+            book={controls.book ?? "quijote"}
+            level={controls.level}
+            running={controls.running}
+            boardW={boardW}
+            boardH={boardH}
+            onTimeout={() => onChange({ running: false })}
+          />
         )}
       </div>
     </section>

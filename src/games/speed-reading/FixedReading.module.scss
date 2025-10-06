@@ -1,0 +1,34 @@
+﻿@use '../../styles/variables' as vars;
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+}
+
+.controlsWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.textArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 640px;
+}
+
+.status {
+  font-size: 0.875rem;
+  color: vars.$text-dim;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
