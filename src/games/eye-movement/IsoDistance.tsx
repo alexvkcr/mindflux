@@ -42,8 +42,6 @@ const clampPoint = (point: Point, bounds: Bounds): Point => ({
  */
 const computeStep = (
   distanceLevel: number,
-  boardW: number,
-  boardH: number,
   bounds: Bounds
 ): number => {
   const maxReachX = Math.max(0, bounds.maxX - bounds.minX); // ancho permitido para el centro
@@ -90,8 +88,8 @@ export function EyeMovementIsoDistance({
 
   const distLevel = Math.min(9, Math.max(1, Math.round(distance)));
   const stepPx = useMemo(
-    () => computeStep(distLevel, boardW, boardH, bounds),
-    [distLevel, boardW, boardH, bounds]
+    () => computeStep(distLevel, bounds),
+    [distLevel, bounds]
   );
 
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
