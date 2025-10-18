@@ -36,13 +36,20 @@ export function ReadingViewportColumns({
             const isActive = cellIndex === safeHighlight;
             const rawText = cells[cellIndex] ?? "";
             const displayText = isActive ? rawText : "";
-
+            const classNameComputed = 
+              `${isActive 
+                  ? styles.lineOn 
+                  : styles.lineOff}
+               ${colIdx === 0 
+                  ? styles.leftColumn 
+                  : styles.rightColumn}
+                `;
             return (
               <p
                 key={colIdx}
                 role="gridcell"
                 data-testid={`cell-${rowIdx}-${colIdx}`}
-                className={isActive ? styles.lineOn : styles.lineOff}
+                className={classNameComputed}
                 aria-hidden={!isActive}
               >
                 {displayText}

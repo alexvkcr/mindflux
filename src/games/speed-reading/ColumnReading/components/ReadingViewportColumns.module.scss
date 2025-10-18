@@ -40,6 +40,12 @@
   opacity: 1;
   filter: none;
 }
+.leftColumn {
+  text-align: end;
+}
+.rightColumn {
+  text-align: start;
+}
 
 .lineOff {
   visibility: hidden;
