@@ -1,23 +1,26 @@
-export const es = {
+﻿export const es = {
   app: {
     title: "mindflux",
     tagline:
-      "MindFlux es un proyecto experimental que reúne ejercicios y tecnologías orientadas a potenciar la lectura rápida, la comprensión y la memorización avanzada, inspirado en las enseñanzas y métodos de Ramón Campayo.",
+      "MindFlux es un proyecto experimental que reune ejercicios y tecnologias orientadas a potenciar la lectura rapida, la comprension y la memorizacion avanzada, inspirado en las ensenanzas y metodos de Ramon Campayo.",
     info:
-      "Pensado para jugar en desktop y móvil, preferiblemente en horizontal. Gracias a Ramón por la inspiración."
+      "Pensado para jugar en desktop y movil, preferiblemente en horizontal. Gracias a Ramon por la inspiracion."
   },
   controls: {
-    categoryLabel: "Categoría",
+    categoryLabel: "Categoria",
     gameLabel: "Juego",
     levelLabel: "Nivel",
     categories: {
       eyeMovement: "Movimiento Del Ojo",
-      speedReading: "Lectura Rápida"
+      speedReading: "Lectura Rapida",
+      visualField: "Campo Visual"
     },
     games: {
-      basic: "Básico",
+      basic: "Basico",
       isoDistance: "Seguimiento Isodistancia",
-      fixedReading: "Lectura Fija"
+      fixedReading: "Lectura Fija",
+      columnReading: "Lectura en columnas",
+      doubleNumber: "Doble numero"
     },
     bookLabel: "Texto",
     books: {

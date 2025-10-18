@@ -1,20 +1,42 @@
-import type { ChangeEvent } from "react";
+﻿import type { ChangeEvent } from "react";
 import { t } from "../i18n";
 import styles from "./ControlsBar.module.scss";
 import { PrimaryButton } from "./ui/PrimaryButton";
 
-export type CategoryKey = "eyeMovement" | "speedReading";
-export type GameKey = "basic" | "isoDistance" | "fixedReading";
+export type CategoryKey = "eyeMovement" | "speedReading" | "visualField";
+export type GameKey =
+  | "basic"
+  | "isoDistance"
+  | "fixedReading"
+  | "columnReading"
+  | "doubleNumber";
 export type BookKey = "quijote" | "regenta" | "colmena";
 
 export type ControlsState = {
   category: CategoryKey;
   game: GameKey;
-  level: number; // 1..9
+  level: number;
   running: boolean;
-  distance?: number; // 1..9 solo aplica a isoDistance
-  book?: BookKey; // solo aplica a juegos de lectura
+  distance?: number;
+  book?: BookKey;
+  widthIdx?: number;
 };
+
+const CATEGORY_GAMES: Record<CategoryKey, GameKey[]> = {
+  eyeMovement: ["basic", "isoDistance"],
+  speedReading: ["fixedReading", "columnReading"],
+  visualField: ["doubleNumber"]
+};
+
+const DEFAULT_BOOK: BookKey = "quijote";
+
+function ensureGame(category: CategoryKey, game: GameKey): GameKey {
+  const candidates = CATEGORY_GAMES[category];
+  if (candidates.includes(game)) {
+    return game;
+  }
+  return candidates[0];
+}
 
 export function ControlsBar(props: {
   state: ControlsState;
@@ -24,25 +46,19 @@ export function ControlsBar(props: {
 
   const handleCategoryChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextCategory = event.target.value as CategoryKey;
+    const nextGame = CATEGORY_GAMES[nextCategory][0];
+    const nextState: Partial<ControlsState> = {
+      category: nextCategory,
+      game: nextGame
+    };
 
     if (nextCategory === "speedReading") {
-      onChange({
-        category: nextCategory,
-        game: "fixedReading",
-        book: state.book ?? "quijote"
-      });
-      return;
+      nextState.book = state.book ?? DEFAULT_BOOK;
+    } else {
+      nextState.book = undefined;
     }
 
-    // Volvemos a movimiento ocular; aseguramos un juego vÃ¡lido.
-    const fallbackGame =
-      state.game === "basic" || state.game === "isoDistance" ? state.game : "basic";
-
-    onChange({
-      category: nextCategory,
-      game: fallbackGame,
-      book: undefined
-    });
+    onChange(nextState);
   };
 
   const handleGameChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -50,16 +66,13 @@ export function ControlsBar(props: {
     onChange({ game: nextGame });
   };
 
-  const effectiveGame =
-    state.category === "speedReading"
-      ? "fixedReading"
-      : state.game === "fixedReading"
-      ? "basic"
-      : state.game;
+  const effectiveGame = ensureGame(state.category, state.game);
+  const isSpeedReading = state.category === "speedReading";
+  const isIsoDistance = effectiveGame === "isoDistance";
+  const isColumnReading = isSpeedReading && effectiveGame === "columnReading";
 
   return (
     <section className={styles.controlsBar}>
-      {/* Categoria unica, por defecto */}
       <div className={styles.control}>
         <label className={styles.label}>{t.controls.categoryLabel}</label>
         <select
@@ -69,10 +82,10 @@ export function ControlsBar(props: {
         >
           <option value="eyeMovement">{t.controls.categories.eyeMovement}</option>
           <option value="speedReading">{t.controls.categories.speedReading}</option>
+          <option value="visualField">{t.controls.categories.visualField}</option>
         </select>
       </div>
 
-      {/* Juego dentro de la categoria */}
       <div className={styles.control}>
         <label className={styles.label}>{t.controls.gameLabel}</label>
         <select
@@ -80,24 +93,20 @@ export function ControlsBar(props: {
           value={effectiveGame}
           onChange={handleGameChange}
         >
-          {state.category === "eyeMovement" ? (
-            <>
-              <option value="basic">{t.controls.games.basic}</option>
-              <option value="isoDistance">{t.controls.games.isoDistance}</option>
-            </>
-          ) : state.category === "speedReading" ? (
-            <option value="fixedReading">{t.controls.games.fixedReading}</option>
-          ) : null}
+          {CATEGORY_GAMES[state.category].map((gameKey) => (
+            <option key={gameKey} value={gameKey}>
+              {t.controls.games[gameKey]}
+            </option>
+          ))}
         </select>
       </div>
-      
-      {/* Selector de libro (solo para lectura) */}
-      {state.category === "speedReading" && (
+
+      {isSpeedReading && !isColumnReading && (
         <div className={styles.control}>
           <label className={styles.label}>{t.controls.bookLabel}</label>
           <select
             className={styles.select}
-            value={state.book || "quijote"}
+            value={state.book || DEFAULT_BOOK}
             onChange={(e) => onChange({ book: e.target.value as BookKey })}
           >
             <option value="quijote">{t.controls.books.quijote}</option>
@@ -107,8 +116,7 @@ export function ControlsBar(props: {
         </div>
       )}
 
-      {/* Distancia 1..9 (solo para isoDistance) */}
-      {state.game === "isoDistance" && (
+      {isIsoDistance && (
         <div className={styles.level}>
           <label className={styles.label}>
             {t.controls.distanceLabel}: {state.distance ?? 3}
@@ -124,32 +132,33 @@ export function ControlsBar(props: {
         </div>
       )}
 
-      {/* Nivel 1..9 */}
-      <div className={styles.level}>
-        <label className={styles.label}>
-          {t.controls.levelLabel}: {state.level}
-        </label>
-        <input
-          className={styles.range}
-          type="range"
-          min={1}
-          max={9}
-          value={state.level}
-          onChange={(e) => onChange({ level: Number(e.target.value) })}
-        />
-      </div>
+      {!isColumnReading && (
+        <div className={styles.level}>
+          <label className={styles.label}>
+            {t.controls.levelLabel}: {state.level}
+          </label>
+          <input
+            className={styles.range}
+            type="range"
+            min={1}
+            max={9}
+            value={state.level}
+            onChange={(e) => onChange({ level: Number(e.target.value) })}
+          />
+        </div>
+      )}
 
-      {/* BotÃ³n Arranque/Parar */}
-      <div className={styles.action}>
-        <PrimaryButton
-          className={styles.button}
-          onClick={() => onChange({ running: !state.running })}
-          aria-pressed={state.running}
-        >
-          {state.running ? t.controls.stop : t.controls.start}
-        </PrimaryButton>
-      </div>
+      {!isColumnReading && (
+        <div className={styles.action}>
+          <PrimaryButton
+            className={styles.button}
+            onClick={() => onChange({ running: !state.running })}
+            aria-pressed={state.running}
+          >
+            {state.running ? t.controls.stop : t.controls.start}
+          </PrimaryButton>
+        </div>
+      )}
     </section>
   );
 }
-

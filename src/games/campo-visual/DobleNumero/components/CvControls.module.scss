@@ -1,0 +1,64 @@
+﻿@use '../../../../styles/variables' as vars;
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.label {
+  font-weight: 600;
+  text-transform: uppercase;
+  color: vars.$text-dim;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+
+.select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid vars.$border;
+  background: vars.$bg-2;
+  color: vars.$text;
+  font-size: 0.875rem;
+  min-width: 90px;
+}
+
+.select:focus {
+  outline: 2px solid vars.$primary;
+  outline-offset: 2px;
+}
+
+.pauseButton {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: vars.$text;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}

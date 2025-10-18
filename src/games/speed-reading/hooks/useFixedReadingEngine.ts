@@ -1,161 +1,231 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { buildLines } from '../utils/buildLines';
-import { tokenize } from '../utils/tokenize';
-
-const LEVEL_INTERVAL_TABLE: Record<number, number> = {
-  1: 1000,
-  2: 750,
-  3: 563,
-  4: 422,
-  5: 316,
-  6: 237,
-  7: 178,
-  8: 133,
-  9: 100
-};
+import { tokenize } from "../utils/tokenize";
+import { buildLines } from "../utils/buildLines";
+import { getMsPerLine } from "../utils/getMsPerLine";
 
 const TIMEOUT_MS = 30000;
 
 export interface EngineParams {
   text: string;
   charWidth: number;
+  wpm: number;
   running: boolean;
-  level: number;
   onTimeout: () => void;
 }
+
+interface AdjustableParams extends Pick<EngineParams, "text" | "charWidth" | "wpm"> {}
 
 export interface EngineState {
   currentLine: string;
   currentIndex: number;
   totalLines: number;
+  timeLeftMs: number;
+  paused: boolean;
+  pause: () => void;
+  resume: () => void;
   reset: (params?: Partial<AdjustableParams>) => void;
 }
-
-type AdjustableParams = Pick<EngineParams, 'text' | 'charWidth' | 'level'>;
 
 export function useFixedReadingEngine({
   text,
   charWidth,
+  wpm,
   running,
-  level,
   onTimeout
 }: EngineParams): EngineState {
   const [overrides, setOverrides] = useState<Partial<AdjustableParams>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isHidden, setIsHidden] = useState(() => {
-    if (typeof document === 'undefined') {
-      return false;
-    }
-    return document.hidden;
-  });
+  const [timeLeftMs, setTimeLeftMs] = useState(TIMEOUT_MS);
+  const [paused, setPaused] = useState(false);
 
-  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const timedOutRef = useRef(false);
+  const timeoutTriggeredRef = useRef(false);
+  const lineTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const lastTickRef = useRef<number | null>(null);
+  const prevRunningRef = useRef(running);
 
   const effectiveText = overrides.text ?? text;
   const effectiveCharWidth = overrides.charWidth ?? charWidth;
-  const effectiveLevel = overrides.level ?? level;
+  const effectiveWpm = overrides.wpm ?? wpm;
 
   const words = useMemo(() => tokenize(effectiveText), [effectiveText]);
-  const lines = useMemo(() => buildLines(words, effectiveCharWidth), [words, effectiveCharWidth]);
+  const lines = useMemo(
+    () => buildLines(words, effectiveCharWidth),
+    [words, effectiveCharWidth]
+  );
   const totalLines = lines.length;
-
   const safeIndex = totalLines === 0 ? 0 : Math.min(currentIndex, totalLines - 1);
-  const currentLine = totalLines === 0 ? '' : lines[safeIndex];
+  const currentLine = totalLines === 0 ? "" : lines[safeIndex];
+
+  const clearLineTimeout = useCallback(() => {
+    if (lineTimeoutRef.current !== null) {
+      clearTimeout(lineTimeoutRef.current);
+      lineTimeoutRef.current = null;
+    }
+  }, []);
+
+  const stopClock = useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    lastTickRef.current = null;
+  }, []);
+
+  const stopAll = useCallback(() => {
+    clearLineTimeout();
+    stopClock();
+  }, [clearLineTimeout, stopClock]);
+
+  const handleTimeout = useCallback(() => {
+    if (timeoutTriggeredRef.current) {
+      return;
+    }
+    timeoutTriggeredRef.current = true;
+    stopAll();
+    setPaused(true);
+    onTimeout();
+  }, [onTimeout, stopAll]);
 
   useEffect(() => {
+    timeoutTriggeredRef.current = false;
     setCurrentIndex(0);
-  }, [effectiveText, effectiveCharWidth]);
+    setTimeLeftMs(TIMEOUT_MS);
+    setPaused(false);
+    stopAll();
+  }, [effectiveText, effectiveCharWidth, effectiveWpm, stopAll]);
 
   useEffect(() => {
-    if (typeof document === 'undefined') {
+    if (running && !prevRunningRef.current) {
+      timeoutTriggeredRef.current = false;
+      setPaused(false);
+      setCurrentIndex(0);
+      setTimeLeftMs(TIMEOUT_MS);
+    }
+
+    if (!running && prevRunningRef.current) {
+      stopAll();
+      setPaused(false);
+      setTimeLeftMs(TIMEOUT_MS);
+    }
+
+    prevRunningRef.current = running;
+  }, [running, stopAll]);
+
+  useEffect(() => {
+    if (!running || paused || timeoutTriggeredRef.current) {
+      stopClock();
       return;
     }
-    const handleVis = () => {
-      setIsHidden(document.hidden);
+
+    const step = (timestamp: number) => {
+      const last = lastTickRef.current ?? timestamp;
+      const delta = Math.min(timestamp - last, 200);
+      lastTickRef.current = timestamp;
+
+      let shouldTimeout = false;
+      setTimeLeftMs((prev) => {
+        if (prev <= 0) {
+          shouldTimeout = true;
+          return 0;
+        }
+        const next = Math.max(0, prev - delta);
+        if (next === 0) {
+          shouldTimeout = true;
+        }
+        return next;
+      });
+
+      if (shouldTimeout) {
+        handleTimeout();
+        return;
+      }
+
+      rafRef.current = requestAnimationFrame(step);
     };
-    document.addEventListener('visibilitychange', handleVis);
+
+    rafRef.current = requestAnimationFrame(step);
+
     return () => {
-      document.removeEventListener('visibilitychange', handleVis);
+      stopClock();
     };
-  }, []);
+  }, [running, paused, handleTimeout, stopClock]);
 
-  const clearTick = useCallback(() => {
-    if (tickRef.current) {
-      clearInterval(tickRef.current);
-      tickRef.current = null;
-    }
-  }, []);
-
-  const clearTimeoutTimer = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-  }, []);
+  const computeDelayForIndex = useCallback(
+    (index: number) => {
+      const line = lines[index] ?? "";
+      const wordsInLine = line.trim().length === 0 ? 1 : line.trim().split(/\s+/u).length;
+      return getMsPerLine(wordsInLine, effectiveWpm);
+    },
+    [lines, effectiveWpm]
+  );
 
   useEffect(() => {
-    clearTick();
-
-    if (!running || isHidden || totalLines <= 1) {
+    if (!running || paused || timeoutTriggeredRef.current || totalLines === 0) {
+      clearLineTimeout();
       return;
     }
 
-    const intervalMs = LEVEL_INTERVAL_TABLE[effectiveLevel] ?? LEVEL_INTERVAL_TABLE[1];
+    const delay = computeDelayForIndex(safeIndex);
+    clearLineTimeout();
 
-    tickRef.current = setInterval(() => {
+    lineTimeoutRef.current = setTimeout(() => {
       setCurrentIndex((prev) => {
         if (totalLines === 0) {
           return 0;
         }
         return (prev + 1) % totalLines;
       });
-    }, intervalMs);
+    }, delay);
 
-    return clearTick;
-  }, [clearTick, effectiveLevel, isHidden, running, totalLines]);
+    return () => {
+      clearLineTimeout();
+    };
+  }, [running, paused, totalLines, safeIndex, computeDelayForIndex, clearLineTimeout]);
 
   useEffect(() => {
-    clearTimeoutTimer();
+    if (totalLines === 0) {
+      setCurrentIndex(0);
+    } else if (currentIndex >= totalLines) {
+      setCurrentIndex(0);
+    }
+  }, [currentIndex, totalLines]);
 
-    if (!running) {
-      timedOutRef.current = false;
+  const pause = useCallback(() => {
+    if (paused || !running) {
       return;
     }
+    clearLineTimeout();
+    stopClock();
+    setPaused(true);
+  }, [paused, running, clearLineTimeout, stopClock]);
 
-    timedOutRef.current = false;
-
-    timeoutRef.current = setTimeout(() => {
-      if (timedOutRef.current) {
-        return;
-      }
-      timedOutRef.current = true;
-      clearTick();
-      onTimeout();
-    }, TIMEOUT_MS);
-
-    return clearTimeoutTimer;
-  }, [clearTick, clearTimeoutTimer, running, onTimeout, effectiveText, effectiveCharWidth, effectiveLevel]);
-
-  useEffect(() => {
-    return () => {
-      clearTick();
-      clearTimeoutTimer();
-    };
-  }, [clearTick, clearTimeoutTimer]);
+  const resume = useCallback(() => {
+    if (!paused || !running || timeLeftMs <= 0 || timeoutTriggeredRef.current) {
+      return;
+    }
+    lastTickRef.current = null;
+    setPaused(false);
+  }, [paused, running, timeLeftMs]);
 
   const reset = useCallback((params?: Partial<AdjustableParams>) => {
-    setCurrentIndex(0);
-    timedOutRef.current = false;
+    timeoutTriggeredRef.current = false;
     setOverrides(params ?? {});
-  }, []);
+    setCurrentIndex(0);
+    setTimeLeftMs(TIMEOUT_MS);
+    setPaused(false);
+    stopAll();
+  }, [stopAll]);
 
   return {
     currentLine,
     currentIndex: safeIndex,
     totalLines,
+    timeLeftMs,
+    paused,
+    pause,
+    resume,
     reset
   };
 }

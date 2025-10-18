@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import "./App.css";
 import styles from "./App.module.scss";
 import { Header } from "./components/Header";
@@ -23,7 +23,8 @@ function App() {
     category: "eyeMovement",
     game: "basic",
     level: 3,
-    running: false
+    running: false,
+    widthIdx: 3
   });
 
   return (
@@ -40,3 +41,4 @@ function App() {
 }
 
 export default App;
+

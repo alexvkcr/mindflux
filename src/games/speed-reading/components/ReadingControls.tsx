@@ -1,25 +1,27 @@
-﻿import type { ChangeEvent } from 'react';
+﻿import type { ChangeEvent } from "react";
 
-import type { BookKey } from '../../../components/ControlsBar.tsx';
-import { WIDTH_MAP } from '../utils/widthMap';
-import type { WidthIndex } from '../utils/widthMap';
+import type { BookKey } from "../../../components/ControlsBar";
+import { WPM_BY_LEVEL, type Level } from "../utils/wpm";
+import { WIDTH_MAP, type WidthIndex } from "../utils/widthMap";
 
-import styles from './ReadingControls.module.scss';
+import styles from "./ReadingControls.module.scss";
 
 export interface ReadingControlsProps {
-  initialBook: BookKey;
-  initialLevel: number;
-  initialWidthIdx: WidthIndex;
+  book: BookKey;
+  level: number;
+  widthIdx: WidthIndex;
   onChange: (state: { book: BookKey; level: number; widthIdx: WidthIndex }) => void;
 }
 
 const BOOK_OPTIONS: Array<{ value: BookKey; label: string }> = [
-  { value: 'quijote', label: 'Quijote' },
-  { value: 'regenta', label: 'Regenta' },
-  { value: 'colmena', label: 'Colmena' }
+  { value: "quijote", label: "Quijote" },
+  { value: "regenta", label: "Regenta" },
+  { value: "colmena", label: "Colmena" }
 ];
 
-const LEVEL_OPTIONS = Array.from({ length: 9 }, (_, idx) => idx + 1);
+const LEVEL_OPTIONS: Array<{ level: Level; wpm: number }> = (
+  Object.entries(WPM_BY_LEVEL) as Array<[string, number]>
+).map(([lvl, wpm]) => ({ level: Number(lvl) as Level, wpm }));
 
 const WIDTH_ENTRIES = (Object.entries(WIDTH_MAP) as Array<[string, number]>).map(([key, width]) => ({
   idx: Number(key) as WidthIndex,
@@ -27,24 +29,24 @@ const WIDTH_ENTRIES = (Object.entries(WIDTH_MAP) as Array<[string, number]>).map
 }));
 
 export function ReadingControls({
-  initialBook,
-  initialLevel,
-  initialWidthIdx,
+  book,
+  level,
+  widthIdx,
   onChange
 }: ReadingControlsProps) {
   const handleBookChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextBook = event.target.value as BookKey;
-    onChange({ book: nextBook, level: initialLevel, widthIdx: initialWidthIdx });
+    onChange({ book: nextBook, level, widthIdx });
   };
 
   const handleLevelChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextLevel = Number(event.target.value);
-    onChange({ book: initialBook, level: nextLevel, widthIdx: initialWidthIdx });
+    onChange({ book, level: nextLevel, widthIdx });
   };
 
   const handleWidthChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextWidth = Number(event.target.value) as WidthIndex;
-    onChange({ book: initialBook, level: initialLevel, widthIdx: nextWidth });
+    onChange({ book, level, widthIdx: nextWidth });
   };
 
   return (
@@ -53,7 +55,7 @@ export function ReadingControls({
         <span className={styles.label}>Texto</span>
         <select
           className={styles.select}
-          value={initialBook}
+          value={book}
           onChange={handleBookChange}
           data-testid="reading-controls-book"
         >
@@ -69,13 +71,13 @@ export function ReadingControls({
         <span className={styles.label}>Velocidad</span>
         <select
           className={styles.select}
-          value={initialLevel}
+          value={level}
           onChange={handleLevelChange}
           data-testid="reading-controls-level"
         >
-          {LEVEL_OPTIONS.map((option) => (
-            <option key={option} value={option}>
-              {option}
+          {LEVEL_OPTIONS.map(({ level: lvl, wpm }) => (
+            <option key={lvl} value={lvl}>
+              {`Nivel ${lvl} - ${wpm} WPM`}
             </option>
           ))}
         </select>
@@ -85,13 +87,13 @@ export function ReadingControls({
         <span className={styles.label}>Ancho</span>
         <select
           className={styles.select}
-          value={initialWidthIdx}
+          value={widthIdx}
           onChange={handleWidthChange}
           data-testid="reading-controls-width"
         >
           {WIDTH_ENTRIES.map(({ idx, width }) => (
             <option key={idx} value={idx}>
-              {width}
+              {width} caracteres
             </option>
           ))}
         </select>
@@ -99,3 +101,4 @@ export function ReadingControls({
     </div>
   );
 }
+
