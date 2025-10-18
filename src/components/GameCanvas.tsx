@@ -1,4 +1,4 @@
-import { useRef, useState, useLayoutEffect, useCallback, useMemo, useEffect } from "react";
+import { useRef, useState, useLayoutEffect, useCallback, useMemo, useEffect, type RefObject } from "react";
 import type { ControlsState, BookKey } from "./ControlsBar";
 import { EyeMovementBasic } from "../games/eye-movement/Basic";
 import { EyeMovementIsoDistance } from "../games/eye-movement/IsoDistance";
@@ -197,7 +197,7 @@ function ColumnReadingStage({ controls, onChange, onTimeout }: ColumnReadingStag
           rows={rows}
           charWidth={charWidth}
           highlightIdx={highlightIdx}
-          gameAreaRef={gameAreaRef}
+          gameAreaRef={gameAreaRef  as RefObject<HTMLDivElement>}
         />
       </div>
     </div>
