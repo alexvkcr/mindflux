@@ -41,29 +41,11 @@ const clampPoint = (point: Point, bounds: Bounds): Point => ({
   y: clamp(point.y, bounds.minY, bounds.maxY)
 });
 
-const reflectWithin = (value: number, min: number, max: number): number => {
-  if (min === max) {
-    return min;
-  }
-  if (min > max) {
-    return max;
-  }
-  const span = max - min;
-  if (span <= 0) {
-    return min;
-  }
-
-  let result = value;
-  while (result < min || result > max) {
-    if (result < min) {
-      result = min + (min - result);
-    } else if (result > max) {
-      result = max - (result - max);
-    }
-  }
-
-  return clamp(result, min, max);
-};
+const isWithinBounds = (point: Point, bounds: Bounds): boolean =>
+  point.x >= bounds.minX &&
+  point.x <= bounds.maxX &&
+  point.y >= bounds.minY &&
+  point.y <= bounds.maxY;
 
 const computeStep = (distanceLevel: number, bounds: Bounds): number => {
   const maxReachX = Math.max(0, bounds.maxX - bounds.minX);
@@ -76,7 +58,10 @@ const computeStep = (distanceLevel: number, bounds: Bounds): number => {
 
   const ratio = (distanceLevel - 1) / 8;
   const t = Math.pow(ratio, 0.55);
-  return rawMin + t * (rawMax - rawMin);
+
+  const scaledMin = rawMin * 1.5;
+  const scaledMax = Math.max(scaledMin, rawMax * 1.05);
+  return scaledMin + t * (scaledMax - scaledMin);
 };
 
 export function EyeMovementIsoDistance({
@@ -125,47 +110,25 @@ export function EyeMovementIsoDistance({
   const moveStep = useCallback(
     (origin?: Point) => {
       setCenter((prev) => {
+        const base = clampPoint(origin ?? prev ?? defaultCenter, bounds);
         const cx = (bounds.minX + bounds.maxX) / 2;
         const cy = (bounds.minY + bounds.maxY) / 2;
-        const base = clampPoint(origin ?? prev ?? defaultCenter, bounds);
         const toCenter = Math.atan2(cy - base.y, cx - base.x);
 
         for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
-          const angle = toCenter + (Math.random() - 0.5) * Math.PI * 2;
+          const randomOffset = (Math.random() - 0.5) * Math.PI * 2;
+          const angle = toCenter + randomOffset;
           const candidate = {
             x: base.x + Math.cos(angle) * stepPx,
             y: base.y + Math.sin(angle) * stepPx
           };
 
-          if (
-            candidate.x >= bounds.minX &&
-            candidate.x <= bounds.maxX &&
-            candidate.y >= bounds.minY &&
-            candidate.y <= bounds.maxY
-          ) {
+          if (isWithinBounds(candidate, bounds)) {
             return candidate;
-          }
-
-          const bounced = {
-            x: reflectWithin(candidate.x, bounds.minX, bounds.maxX),
-            y: reflectWithin(candidate.y, bounds.minY, bounds.maxY)
-          };
-
-          if (
-            bounced.x >= bounds.minX &&
-            bounced.x <= bounds.maxX &&
-            bounced.y >= bounds.minY &&
-            bounced.y <= bounds.maxY
-          ) {
-            return bounced;
           }
         }
 
-        const fallback = {
-          x: reflectWithin(base.x + Math.cos(toCenter) * stepPx, bounds.minX, bounds.maxX),
-          y: reflectWithin(base.y + Math.sin(toCenter) * stepPx, bounds.minY, bounds.maxY)
-        };
-        return clampPoint(fallback, bounds);
+        return base;
       });
     },
     [bounds, defaultCenter, stepPx]
