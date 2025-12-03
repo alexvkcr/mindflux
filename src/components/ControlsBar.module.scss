@@ -25,9 +25,26 @@
 }
 
 .action {
+  flex: 2 1 360px;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.actionRow {
+  width: 100%;
   display: flex;
   justify-content: flex-end;
-  flex: 1 1 220px;
+}
+
+.extraControls {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .label {
@@ -65,6 +82,11 @@
   }
   
   .action {
+    align-items: center;
+  }
+
+  .actionRow,
+  .extraControls {
     justify-content: center;
   }
 }

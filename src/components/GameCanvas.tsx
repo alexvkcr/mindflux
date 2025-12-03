@@ -1,4 +1,4 @@
-import { useRef, useState, useLayoutEffect, useCallback, useMemo, useEffect, type RefObject } from "react";
+import { useRef, useState, useLayoutEffect, useCallback, useMemo, useEffect, type RefObject, type CSSProperties } from "react";
 import type { ControlsState, BookKey } from "./ControlsBar";
 import { EyeMovementBasic } from "../games/eye-movement/Basic";
 import { EyeMovementIsoDistance } from "../games/eye-movement/IsoDistance";
@@ -263,9 +263,27 @@ export function GameCanvas({
     onChange({ running: false });
   }, [onChange]);
 
+  const isColumnReadingGame = controls.category === "speedReading" && controls.game === "columnReading";
+  const shouldGrowWithContent = controls.category === "visualField" && controls.game === "doubleNumber";
+  const boardClassName = [
+    styles.board,
+    isColumnReadingGame ? styles.noFrame : "",
+    shouldGrowWithContent ? styles.boardFlexible : ""
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  const boardStyle: CSSProperties = { width: boardW };
+  if (shouldGrowWithContent) {
+    boardStyle.minHeight = boardH;
+  } else {
+    boardStyle.height = boardH;
+  }
+
   return (
     <section ref={wrapRef} className={styles.wrap}>
-      <div className={`${styles.board} ${controls.category === "speedReading" && controls.game === "columnReading" ? styles.noFrame : ""}`} style={{ width: boardW, height: boardH }}>
+      <div className={boardClassName} style={boardStyle}>
         {controls.category === "eyeMovement" && (
           controls.game === "basic" ? (
             <EyeMovementBasic

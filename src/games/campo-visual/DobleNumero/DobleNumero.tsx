@@ -1,9 +1,10 @@
-﻿import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import styles from "./DobleNumero.module.scss";
 import { CvControls } from "./components/CvControls";
-import { useDoubleNumberEngine, type Mode } from "./hooks/useDoubleNumberEngine";
+import { useDoubleNumberEngine, type ModeVariant } from "./hooks/useDoubleNumberEngine";
 import { formatCountdown } from "../../speed-reading/utils/formatCountdown";
+import { useRegisterControlsPortal } from "../../../contexts/ControlsPortalContext";
 
 interface Props {
   level: number;
@@ -31,10 +32,14 @@ export function DobleNumero({
 }: Props) {
   const [speedLevel, setSpeedLevel] = useState(() => clampLevel(level));
   const [difficultyLevel, setDifficultyLevel] = useState(() => clampLevel(level));
-  const [mode, setMode] = useState<Mode>("numbers");
+  const [intervalLevel, setIntervalLevel] = useState(() => clampLevel(level));
+  const [mode, setMode] = useState<ModeVariant>("numbers-2");
+  const registerControlsPortal = useRegisterControlsPortal();
 
   useEffect(() => {
-    setSpeedLevel(clampLevel(level));
+    const nextLevel = clampLevel(level);
+    setSpeedLevel(nextLevel);
+    setIntervalLevel(nextLevel);
   }, [level]);
 
   const {
@@ -48,6 +53,7 @@ export function DobleNumero({
   } = useDoubleNumberEngine({
     speedLevel,
     difficultyLevel,
+    intervalLevel,
     mode,
     running,
     boardW,
@@ -57,7 +63,7 @@ export function DobleNumero({
 
   useEffect(() => {
     reset();
-  }, [speedLevel, difficultyLevel, reset]);
+  }, [speedLevel, difficultyLevel, intervalLevel, mode, reset]);
 
   const handleSpeedChange = useCallback((next: number) => {
     setSpeedLevel(clampLevel(next));
@@ -67,7 +73,11 @@ export function DobleNumero({
     setDifficultyLevel(clampLevel(next));
   }, []);
 
-  const handleModeChange = useCallback((nextMode: Mode) => {
+  const handleIntervalChange = useCallback((next: number) => {
+    setIntervalLevel(clampLevel(next));
+  }, []);
+
+  const handleModeChange = useCallback((nextMode: ModeVariant) => {
     setMode(nextMode);
   }, []);
 
@@ -82,6 +92,43 @@ export function DobleNumero({
     }
   }, [paused, pause, resume, running]);
 
+  useEffect(() => {
+    registerControlsPortal(
+      <CvControls
+        speedLevel={speedLevel}
+        difficultyLevel={difficultyLevel}
+        intervalLevel={intervalLevel}
+        running={running}
+        paused={paused}
+        mode={mode}
+        onSpeedChange={handleSpeedChange}
+        onDifficultyChange={handleDifficultyChange}
+        onIntervalChange={handleIntervalChange}
+        onModeChange={handleModeChange}
+        onTogglePause={handleTogglePause}
+      />
+    );
+  }, [
+    registerControlsPortal,
+    speedLevel,
+    difficultyLevel,
+    intervalLevel,
+    running,
+    paused,
+    mode,
+    handleSpeedChange,
+    handleDifficultyChange,
+    handleIntervalChange,
+    handleModeChange,
+    handleTogglePause
+  ]);
+
+  useEffect(() => {
+    return () => {
+      registerControlsPortal(null);
+    };
+  }, [registerControlsPortal]);
+
   const formattedTime = useMemo(() => formatCountdown(timeLeftMs), [timeLeftMs]);
   const separation = useMemo(() => getSeparationRatio(difficultyLevel), [difficultyLevel]);
 
@@ -91,20 +138,6 @@ export function DobleNumero({
 
   return (
     <div className={styles.container} data-testid="doble-numero-container">
-      <div className={styles.controlsWrapper}>
-        <CvControls
-          speedLevel={speedLevel}
-          difficultyLevel={difficultyLevel}
-          running={running}
-          paused={paused}
-          mode={mode}
-          onSpeedChange={handleSpeedChange}
-          onDifficultyChange={handleDifficultyChange}
-          onModeChange={handleModeChange}
-          onTogglePause={handleTogglePause}
-        />
-      </div>
-
       <div className={styles.statusBar}>
         <div className={styles.statusItem} aria-live="polite">
           Tiempo restante: {formattedTime}

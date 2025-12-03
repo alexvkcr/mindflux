@@ -1,7 +1,6 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const ROUND_MS = 45000;
-const BLANK_MS = 1000;
 
 const SPEED_TABLE: Record<number, number> = {
   1: 1000,
@@ -15,7 +14,25 @@ const SPEED_TABLE: Record<number, number> = {
   9: 200
 };
 
-export type Mode = "numbers" | "chars";
+const INTERVAL_TABLE: Record<number, number> = {
+  1: 1400,
+  2: 1200,
+  3: 1000,
+  4: 900,
+  5: 800,
+  6: 650,
+  7: 520,
+  8: 420,
+  9: 320
+};
+
+type SymbolKind = "numbers" | "chars";
+
+export type ModeVariant =
+  | "numbers-2"
+  | "numbers-4"
+  | "chars-2"
+  | "chars-4";
 
 type Phase = "show" | "blank";
 
@@ -27,7 +44,8 @@ type NumberPair = {
 export interface EngineParams {
   speedLevel: number;
   difficultyLevel: number;
-  mode: Mode;
+  intervalLevel: number;
+  mode: ModeVariant;
   running: boolean;
   boardW: number;
   boardH: number;
@@ -58,20 +76,41 @@ function randomLetter(): string {
   return String.fromCharCode(code);
 }
 
-function generateToken(mode: Mode): string {
-  return mode === "numbers" ? randomDigit() : randomLetter();
+function generateToken(kind: SymbolKind): string {
+  return kind === "numbers" ? randomDigit() : randomLetter();
 }
 
-function createPair(mode: Mode): NumberPair {
+function getModeKind(mode: ModeVariant): SymbolKind {
+  return mode.startsWith("numbers") ? "numbers" : "chars";
+}
+
+function getSymbolsPerSide(mode: ModeVariant): number {
+  return mode.endsWith("-4") ? 2 : 1;
+}
+
+function createSide(mode: ModeVariant): string {
+  const count = getSymbolsPerSide(mode);
+  const kind = getModeKind(mode);
+  let result = "";
+  for (let idx = 0; idx < count; idx += 1) {
+    result += generateToken(kind);
+  }
+  return result;
+}
+
+function createPair(mode: ModeVariant): NumberPair {
   return {
-    left: generateToken(mode),
-    right: generateToken(mode)
+    left: createSide(mode),
+    right: createSide(mode)
   };
 }
+
+
 
 export function useDoubleNumberEngine({
   speedLevel,
   difficultyLevel: _difficultyLevel,
+  intervalLevel,
   mode,
   running,
   boardW,
@@ -84,7 +123,7 @@ export function useDoubleNumberEngine({
   const [paused, setPaused] = useState(false);
 
   const speedRef = useRef(clampLevel(speedLevel));
-  const modeRef = useRef<Mode>(mode);
+  const modeRef = useRef<ModeVariant>(mode);
   const boardRef = useRef({ boardW, boardH });
 
   const phaseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -100,6 +139,11 @@ export function useDoubleNumberEngine({
     const level = clampLevel(speedLevel);
     return SPEED_TABLE[level] ?? SPEED_TABLE[1];
   }, [speedLevel]);
+
+  const intervalDuration = useMemo(() => {
+    const level = clampLevel(intervalLevel);
+    return INTERVAL_TABLE[level] ?? INTERVAL_TABLE[1];
+  }, [intervalLevel]);
 
   const clearPhaseTimeout = useCallback(() => {
     if (phaseTimeoutRef.current !== null) {
@@ -134,7 +178,7 @@ export function useDoubleNumberEngine({
 
   const schedulePhase = useCallback(
     (currentPhase: Phase) => {
-      const baseDuration = currentPhase === "show" ? showDuration : BLANK_MS;
+      const baseDuration = currentPhase === "show" ? showDuration : intervalDuration;
       const pending = remainingPhaseRef.current ?? baseDuration;
 
       phaseDurationRef.current = baseDuration;
@@ -154,7 +198,7 @@ export function useDoubleNumberEngine({
         }
       }, pending);
     },
-    [clearPhaseTimeout, showDuration]
+    [clearPhaseTimeout, showDuration, intervalDuration]
   );
 
   useEffect(() => {

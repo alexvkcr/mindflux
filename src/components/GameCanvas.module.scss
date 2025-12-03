@@ -99,4 +99,8 @@
 .noFrame {
   border: none !important;
   background: transparent !important;
-}
+}
+.boardFlexible {
+  max-height: none;
+  overflow: visible;
+}

@@ -1,7 +1,8 @@
-﻿import type { ChangeEvent } from "react";
+import type { ChangeEvent } from "react";
 import { t } from "../i18n";
 import styles from "./ControlsBar.module.scss";
 import { PrimaryButton } from "./ui/PrimaryButton";
+import { useControlsPortalNode } from "../contexts/ControlsPortalContext";
 
 export type CategoryKey = "eyeMovement" | "speedReading" | "visualField";
 export type GameKey =
@@ -43,6 +44,7 @@ export function ControlsBar(props: {
   onChange: (next: Partial<ControlsState>) => void;
 }) {
   const { state, onChange } = props;
+  const extraControls = useControlsPortalNode();
 
   const handleCategoryChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextCategory = event.target.value as CategoryKey;
@@ -70,6 +72,7 @@ export function ControlsBar(props: {
   const isSpeedReading = state.category === "speedReading";
   const isIsoDistance = effectiveGame === "isoDistance";
   const isColumnReading = isSpeedReading && effectiveGame === "columnReading";
+  const isDoubleNumber = state.category === "visualField" && effectiveGame === "doubleNumber";
 
   return (
     <section className={styles.controlsBar}>
@@ -132,7 +135,7 @@ export function ControlsBar(props: {
         </div>
       )}
 
-      {!isColumnReading && (
+      {!isColumnReading && !isDoubleNumber && (
         <div className={styles.level}>
           <label className={styles.label}>
             {t.controls.levelLabel}: {state.level}
@@ -150,13 +153,19 @@ export function ControlsBar(props: {
 
       {!isColumnReading && (
         <div className={styles.action}>
-          <PrimaryButton
-            className={styles.button}
-            onClick={() => onChange({ running: !state.running })}
-            aria-pressed={state.running}
-          >
-            {state.running ? t.controls.stop : t.controls.start}
-          </PrimaryButton>
+          <div className={styles.actionRow}>
+            <PrimaryButton
+              className={styles.button}
+              onClick={() => onChange({ running: !state.running })}
+              aria-pressed={state.running}
+            >
+              {state.running ? t.controls.stop : t.controls.start}
+            </PrimaryButton>
+          </div>
+
+          {extraControls && (
+            <div className={styles.extraControls}>{extraControls}</div>
+          )}
         </div>
       )}
     </section>
