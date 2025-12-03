@@ -26,13 +26,17 @@ const INTERVAL_TABLE: Record<number, number> = {
   9: 320
 };
 
+const VOWELS = "AEIOU";
+const CONSONANTS = "BCDFGHJKLMNPQRSTVWXYZ";
+
 type SymbolKind = "numbers" | "chars";
 
 export type ModeVariant =
   | "numbers-2"
   | "numbers-4"
   | "chars-2"
-  | "chars-4";
+  | "chars-4"
+  | "binary-6";
 
 type Phase = "show" | "blank";
 
@@ -76,16 +80,53 @@ function randomLetter(): string {
   return String.fromCharCode(code);
 }
 
-function generateToken(kind: SymbolKind): string {
-  return kind === "numbers" ? randomDigit() : randomLetter();
+function randomLetterFromSet(pool: string): string {
+  if (!pool) {
+    return randomLetter();
+  }
+  const idx = Math.floor(Math.random() * pool.length);
+  const char = pool[idx] ?? 'A';
+  return Math.random() < 0.5 ? char.toLowerCase() : char;
+}
+
+function randomConsonant(): string {
+  return randomLetterFromSet(CONSONANTS);
+}
+
+function randomVowelLetter(): string {
+  return randomLetterFromSet(VOWELS);
+}
+
+function generateToken(mode: ModeVariant, kind: SymbolKind, position: number): string {
+  if (mode === "binary-6") {
+    return Math.random() < 0.5 ? "0" : "1";
+  }
+  if (kind === "numbers") {
+    return randomDigit();
+  }
+  if (mode === "chars-4") {
+    return position % 2 === 0 ? randomConsonant() : randomVowelLetter();
+  }
+  return randomLetter();
 }
 
 function getModeKind(mode: ModeVariant): SymbolKind {
-  return mode.startsWith("numbers") ? "numbers" : "chars";
+  if (mode.startsWith("numbers") || mode.startsWith("binary")) {
+    return "numbers";
+  }
+  return "chars";
 }
 
 function getSymbolsPerSide(mode: ModeVariant): number {
-  return mode.endsWith("-4") ? 2 : 1;
+  const match = mode.match(/-(\d+)$/);
+  if (!match) {
+    return 1;
+  }
+  const total = Number(match[1]);
+  if (!Number.isFinite(total) || total <= 0) {
+    return 1;
+  }
+  return Math.max(1, Math.floor(total / 2));
 }
 
 function createSide(mode: ModeVariant): string {
@@ -93,7 +134,7 @@ function createSide(mode: ModeVariant): string {
   const kind = getModeKind(mode);
   let result = "";
   for (let idx = 0; idx < count; idx += 1) {
-    result += generateToken(kind);
+    result += generateToken(mode, kind, idx);
   }
   return result;
 }

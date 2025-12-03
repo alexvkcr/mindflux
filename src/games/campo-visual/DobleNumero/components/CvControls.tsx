@@ -9,7 +9,8 @@ const MODE_OPTIONS: Array<{ value: ModeVariant; label: string }> = [
   { value: "numbers-2", label: "2 números (1 por lado)" },
   { value: "numbers-4", label: "4 números (2 por lado)" },
   { value: "chars-2", label: "2 letras (1 por lado)" },
-  { value: "chars-4", label: "4 letras (2 por lado)" }
+  { value: "chars-4", label: "4 letras (2 por lado)" },
+  { value: "binary-6", label: "Binarios (3 por lado)" }
 ];
 
 export interface CvControlsProps {
@@ -58,7 +59,7 @@ export function CvControls({
   return (
     <div className={styles.controls}>
       <label className={styles.control}>
-        <span className={styles.label}>Velocidad de est�mulo</span>
+        <span className={styles.label}>Velocidad de estímulo</span>
         <select
           className={styles.select}
           value={speedLevel}
@@ -73,7 +74,7 @@ export function CvControls({
       </label>
 
       <label className={styles.control}>
-        <span className={styles.label}>Separaci�n lateral</span>
+        <span className={styles.label}>Separación lateral</span>
         <select
           className={styles.select}
           value={difficultyLevel}
@@ -103,7 +104,7 @@ export function CvControls({
       </label>
 
       <label className={styles.control}>
-        <span className={styles.label}>Modo de est�mulo</span>
+        <span className={styles.label}>Modo de estímulo</span>
         <select
           className={styles.select}
           value={mode}
