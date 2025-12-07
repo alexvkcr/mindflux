@@ -1,0 +1,7 @@
+.circle {
+  width: min(160px, 40vw);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #5ce69b, #1c7f55);
+  box-shadow: 0 0 50px rgba(92, 230, 155, 0.6);
+}

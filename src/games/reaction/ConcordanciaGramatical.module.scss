@@ -1,0 +1,12 @@
+.words {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.word {
+  font-size: clamp(36px, 6vw, 80px);
+  font-weight: 600;
+  color: #f0f0f0;
+  text-transform: lowercase;
+}

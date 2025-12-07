@@ -13,14 +13,18 @@
     categories: {
       eyeMovement: "Movimiento Del Ojo",
       speedReading: "Lectura Rapida",
-      visualField: "Campo Visual"
+      visualField: "Campo Visual",
+      reactionTime: "Tiempo de reaccion"
     },
     games: {
       basic: "Basico",
       isoDistance: "Seguimiento Isodistancia",
       fixedReading: "Lectura Fija",
       columnReading: "Lectura en columnas",
-      doubleNumber: "Doble numero"
+      doubleNumber: "Doble numero",
+      quickReflex: "Reflejo Rapido",
+      quickMath: "Calculo Rapido",
+      grammarMatch: "Concordancia Gramatical"
     },
     bookLabel: "Texto",
     books: {

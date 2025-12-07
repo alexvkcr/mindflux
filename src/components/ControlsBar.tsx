@@ -4,13 +4,16 @@ import styles from "./ControlsBar.module.scss";
 import { PrimaryButton } from "./ui/PrimaryButton";
 import { useControlsPortalNode } from "../contexts/ControlsPortalContext";
 
-export type CategoryKey = "eyeMovement" | "speedReading" | "visualField";
+export type CategoryKey = "eyeMovement" | "speedReading" | "visualField" | "reactionTime";
 export type GameKey =
   | "basic"
   | "isoDistance"
   | "fixedReading"
   | "columnReading"
-  | "doubleNumber";
+  | "doubleNumber"
+  | "quickReflex"
+  | "quickMath"
+  | "grammarMatch";
 export type BookKey = "quijote" | "regenta" | "colmena";
 
 export type ControlsState = {
@@ -26,7 +29,8 @@ export type ControlsState = {
 const CATEGORY_GAMES: Record<CategoryKey, GameKey[]> = {
   eyeMovement: ["basic", "isoDistance"],
   speedReading: ["fixedReading", "columnReading"],
-  visualField: ["doubleNumber"]
+  visualField: ["doubleNumber"],
+  reactionTime: ["quickReflex", "quickMath", "grammarMatch"]
 };
 
 const DEFAULT_BOOK: BookKey = "quijote";
@@ -73,6 +77,7 @@ export function ControlsBar(props: {
   const isIsoDistance = effectiveGame === "isoDistance";
   const isColumnReading = isSpeedReading && effectiveGame === "columnReading";
   const isDoubleNumber = state.category === "visualField" && effectiveGame === "doubleNumber";
+  const isReactionCategory = state.category === "reactionTime";
 
   return (
     <section className={styles.controlsBar}>
@@ -86,6 +91,7 @@ export function ControlsBar(props: {
           <option value="eyeMovement">{t.controls.categories.eyeMovement}</option>
           <option value="speedReading">{t.controls.categories.speedReading}</option>
           <option value="visualField">{t.controls.categories.visualField}</option>
+          <option value="reactionTime">{t.controls.categories.reactionTime}</option>
         </select>
       </div>
 
@@ -135,7 +141,7 @@ export function ControlsBar(props: {
         </div>
       )}
 
-      {!isColumnReading && !isDoubleNumber && (
+      {!isColumnReading && !isDoubleNumber && !isReactionCategory && (
         <div className={styles.level}>
           <label className={styles.label}>
             {t.controls.levelLabel}: {state.level}

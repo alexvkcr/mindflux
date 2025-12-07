@@ -6,6 +6,9 @@ import { FixedReading } from "../games/speed-reading/FixedReading";
 import { ColumnReading } from "../games/speed-reading/ColumnReading/ColumnReading";
 import { ReadingControls } from "../games/speed-reading/components/ReadingControls";
 import { DobleNumero } from "../games/campo-visual/DobleNumero/DobleNumero";
+import { ReflejoRapido } from "../games/reaction/ReflejoRapido";
+import { CalculoRapido } from "../games/reaction/CalculoRapido";
+import { ConcordanciaGramatical } from "../games/reaction/ConcordanciaGramatical";
 import { useColumnHighlightEngine } from "../games/speed-reading/ColumnReading/hooks/useColumnHighlightEngine";
 import { levelToWpm } from "../games/speed-reading/utils/wpm";
 import { texts } from "../games/speed-reading/texts";
@@ -328,6 +331,18 @@ export function GameCanvas({
             boardH={boardH}
             onTimeout={handleTimeout}
           />
+        )}
+
+        {controls.category === "reactionTime" && controls.game === "quickReflex" && (
+          <ReflejoRapido running={controls.running} boardW={boardW} boardH={boardH} onTimeout={handleTimeout} />
+        )}
+
+        {controls.category === "reactionTime" && controls.game === "quickMath" && (
+          <CalculoRapido running={controls.running} boardW={boardW} boardH={boardH} onTimeout={handleTimeout} />
+        )}
+
+        {controls.category === "reactionTime" && controls.game === "grammarMatch" && (
+          <ConcordanciaGramatical running={controls.running} boardW={boardW} boardH={boardH} onTimeout={handleTimeout} />
         )}
       </div>
     </section>
