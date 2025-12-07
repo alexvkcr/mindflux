@@ -9,6 +9,9 @@ import { DobleNumero } from "../games/campo-visual/DobleNumero/DobleNumero";
 import { ReflejoRapido } from "../games/reaction/ReflejoRapido";
 import { CalculoRapido } from "../games/reaction/CalculoRapido";
 import { ConcordanciaGramatical } from "../games/reaction/ConcordanciaGramatical";
+import { SumaCadena } from "../games/math/SumaCadena";
+import { CuentaMental } from "../games/math/CuentaMental";
+import { ConteoHiLo } from "../games/math/ConteoHiLo";
 import { useColumnHighlightEngine } from "../games/speed-reading/ColumnReading/hooks/useColumnHighlightEngine";
 import { levelToWpm } from "../games/speed-reading/utils/wpm";
 import { texts } from "../games/speed-reading/texts";
@@ -331,6 +334,18 @@ export function GameCanvas({
             boardH={boardH}
             onTimeout={handleTimeout}
           />
+        )}
+
+        {controls.category === "math" && controls.game === "mathChain" && (
+          <SumaCadena running={controls.running} boardW={boardW} boardH={boardH} onTimeout={handleTimeout} />
+        )}
+
+        {controls.category === "math" && controls.game === "mentalCount" && (
+          <CuentaMental running={controls.running} boardW={boardW} boardH={boardH} onTimeout={handleTimeout} />
+        )}
+
+        {controls.category === "math" && controls.game === "hiLoCount" && (
+          <ConteoHiLo running={controls.running} boardW={boardW} boardH={boardH} onTimeout={handleTimeout} />
         )}
 
         {controls.category === "reactionTime" && controls.game === "quickReflex" && (

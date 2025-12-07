@@ -1,0 +1,173 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  gap: 16px;
+  box-sizing: border-box;
+  color: #f6f7fb;
+}
+
+.topBar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badge {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.instructions {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.75);
+  text-align: center;
+}
+
+.board {
+  flex: 1;
+  min-height: 0;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.25));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+  text-align: center;
+}
+
+.digitDisplay,
+.numberDisplay,
+.cardDisplay {
+  font-size: clamp(48px, 12vw, 140px);
+  font-weight: 700;
+}
+
+.cardDisplay {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.inputRow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.inputRow input {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  width: min(240px, 80%);
+  text-align: center;
+}
+
+.validateRow {
+  display: flex;
+  justify-content: center;
+}
+
+.feedbackOk {
+  color: #5ce69b;
+}
+
+.feedbackFail {
+  color: #f58181;
+}
+
+.feedbackNeutral {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.helperText {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+}
+
+.responseButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.responseButtons button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.responseButtons button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.progressTrack {
+  width: min(460px, 90%);
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.progressFill {
+  height: 100%;
+  background: #5ce69b;
+  animation: math-drain linear forwards;
+  transform-origin: left center;
+}
+
+@keyframes math-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.cooldown {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.countInfo {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.explanationBtn {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.explanationBtn:hover,
+.explanationBtn:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+}

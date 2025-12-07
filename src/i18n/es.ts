@@ -14,7 +14,8 @@
       eyeMovement: "Movimiento Del Ojo",
       speedReading: "Lectura Rapida",
       visualField: "Campo Visual",
-      reactionTime: "Tiempo de reaccion"
+      reactionTime: "Tiempo de reaccion",
+      math: "Juegos matematicos"
     },
     games: {
       basic: "Basico",
@@ -24,7 +25,10 @@
       doubleNumber: "Doble numero",
       quickReflex: "Reflejo Rapido",
       quickMath: "Calculo Rapido",
-      grammarMatch: "Concordancia Gramatical"
+      grammarMatch: "Concordancia Gramatical",
+      mathChain: "Suma en Cadena",
+      mentalCount: "Cuenta Mental 1-0-(-1)",
+      hiLoCount: "Conteo de Cartas Hi-Lo"
     },
     bookLabel: "Texto",
     books: {
