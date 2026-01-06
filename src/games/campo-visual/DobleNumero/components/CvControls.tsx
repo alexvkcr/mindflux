@@ -2,7 +2,7 @@ import type { ChangeEvent } from "react";
 
 import styles from "./CvControls.module.scss";
 import type { ModeVariant } from "../hooks/useDoubleNumberEngine";
-import { SPEED_LEVEL_OPTIONS } from "../constants";
+import { SPEED_LEVEL_OPTIONS, INTERVAL_LEVEL_OPTIONS } from "../constants";
 
 const LEVEL_OPTIONS = Array.from({ length: 9 }, (_, idx) => idx + 1);
 
@@ -96,7 +96,7 @@ export function CvControls({
           value={intervalLevel}
           onChange={handleIntervalChange}
         >
-          {LEVEL_OPTIONS.map((option) => (
+          {INTERVAL_LEVEL_OPTIONS.map((option) => (
             <option key={option} value={option}>
               Nivel {option}
             </option>

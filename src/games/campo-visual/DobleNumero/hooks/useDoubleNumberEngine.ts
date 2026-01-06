@@ -1,20 +1,8 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { SPEED_TABLE, clampSpeedLevel } from "../constants";
+import { SPEED_TABLE, clampSpeedLevel, INTERVAL_TABLE, clampIntervalLevel } from "../constants";
 
 const ROUND_MS = 45000;
-
-const INTERVAL_TABLE: Record<number, number> = {
-  1: 1400,
-  2: 1200,
-  3: 1000,
-  4: 900,
-  5: 800,
-  6: 650,
-  7: 520,
-  8: 420,
-  9: 320
-};
 
 const VOWELS = "AEIOU";
 const CONSONANTS = "BCDFGHJKLMNPQRSTVWXYZ";
@@ -54,10 +42,6 @@ export interface EngineState {
   pause: () => void;
   resume: () => void;
   reset: () => void;
-}
-
-function clampIntervalLevel(level: number): number {
-  return Math.min(9, Math.max(1, Math.round(level)));
 }
 
 function randomDigit(): string {

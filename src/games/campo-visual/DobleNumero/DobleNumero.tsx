@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./DobleNumero.module.scss";
 import { CvControls } from "./components/CvControls";
 import { useDoubleNumberEngine, type ModeVariant } from "./hooks/useDoubleNumberEngine";
-import { clampSpeedLevel } from "./constants";
+import { clampSpeedLevel, clampIntervalLevel } from "./constants";
 import { formatCountdown } from "../../speed-reading/utils/formatCountdown";
 import { useRegisterControlsPortal } from "../../../contexts/ControlsPortalContext";
 
@@ -33,12 +33,12 @@ export function DobleNumero({
 }: Props) {
   const [speedLevel, setSpeedLevel] = useState(() => clampSpeedLevel(level));
   const [difficultyLevel, setDifficultyLevel] = useState(() => clampCvLevel(level));
-  const [intervalLevel, setIntervalLevel] = useState(() => clampCvLevel(level));
+  const [intervalLevel, setIntervalLevel] = useState(() => clampIntervalLevel(level));
   const [mode, setMode] = useState<ModeVariant>("numbers-2");
   const registerControlsPortal = useRegisterControlsPortal();
 
   useEffect(() => {
-    const nextInterval = clampCvLevel(level);
+    const nextInterval = clampIntervalLevel(level);
     setSpeedLevel(clampSpeedLevel(level));
     setIntervalLevel(nextInterval);
   }, [level]);
@@ -75,7 +75,7 @@ export function DobleNumero({
   }, []);
 
   const handleIntervalChange = useCallback((next: number) => {
-    setIntervalLevel(clampCvLevel(next));
+    setIntervalLevel(clampIntervalLevel(next));
   }, []);
 
   const handleModeChange = useCallback((nextMode: ModeVariant) => {
