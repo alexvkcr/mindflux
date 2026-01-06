@@ -152,6 +152,7 @@ export function useDoubleNumberEngine({
   const [phase, setPhase] = useState<Phase>("blank");
   const [timeLeftMs, setTimeLeftMs] = useState(ROUND_MS);
   const [paused, setPaused] = useState(false);
+  const [clockSeed, setClockSeed] = useState(0);
 
   const speedRef = useRef(clampSpeedLevel(speedLevel));
   const modeRef = useRef<ModeVariant>(mode);
@@ -326,7 +327,7 @@ export function useDoubleNumberEngine({
     return () => {
       stopClock();
     };
-  }, [running, paused, handleRoundOver, stopClock]);
+  }, [running, paused, handleRoundOver, stopClock, clockSeed]);
 
   const pause = useCallback(() => {
     if (paused || !running) {
@@ -362,6 +363,9 @@ export function useDoubleNumberEngine({
     phaseStartRef.current = null;
     stopAll();
     setPhase(running ? "show" : "blank");
+    if (running) {
+      setClockSeed((prev) => prev + 1);
+    }
   }, [running, stopAll]);
 
   useEffect(() => {
