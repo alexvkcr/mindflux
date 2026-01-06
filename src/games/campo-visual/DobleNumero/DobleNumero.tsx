@@ -50,7 +50,8 @@ export function DobleNumero({
     paused,
     pause,
     resume,
-    reset
+    reset,
+    timedOut
   } = useDoubleNumberEngine({
     speedLevel,
     difficultyLevel,
@@ -58,13 +59,18 @@ export function DobleNumero({
     mode,
     running,
     boardW,
-    boardH,
-    onRoundOver: onTimeout
+    boardH
   });
 
   useEffect(() => {
     reset();
   }, [speedLevel, difficultyLevel, intervalLevel, mode, reset]);
+
+  useEffect(() => {
+    if (timedOut) {
+      onTimeout();
+    }
+  }, [timedOut, onTimeout]);
 
   const handleSpeedChange = useCallback((next: number) => {
     setSpeedLevel(clampSpeedLevel(next));

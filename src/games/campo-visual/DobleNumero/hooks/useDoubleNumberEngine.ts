@@ -31,7 +31,6 @@ export interface EngineParams {
   running: boolean;
   boardW: number;
   boardH: number;
-  onRoundOver: () => void;
 }
 
 export interface EngineState {
@@ -42,6 +41,7 @@ export interface EngineState {
   pause: () => void;
   resume: () => void;
   reset: () => void;
+  timedOut: boolean;
 }
 
 function randomDigit(): string {
@@ -129,13 +129,13 @@ export function useDoubleNumberEngine({
   mode,
   running,
   boardW,
-  boardH,
-  onRoundOver
+  boardH
 }: EngineParams): EngineState {
   const [pair, setPair] = useState<NumberPair>(() => createPair(mode));
   const [phase, setPhase] = useState<Phase>("blank");
   const [timeLeftMs, setTimeLeftMs] = useState(ROUND_MS);
   const [paused, setPaused] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
   const [clockSeed, setClockSeed] = useState(0);
 
   const speedRef = useRef(clampSpeedLevel(speedLevel));
@@ -189,8 +189,8 @@ export function useDoubleNumberEngine({
     stopAll();
     setPaused(true);
     setPhase("blank");
-    onRoundOver();
-  }, [onRoundOver, stopAll]);
+    setTimedOut(true);
+  }, [stopAll]);
 
   const schedulePhase = useCallback(
     (currentPhase: Phase) => {
@@ -236,6 +236,7 @@ export function useDoubleNumberEngine({
   useEffect(() => {
     if (running && !prevRunningRef.current) {
       timedOutRef.current = false;
+      setTimedOut(false);
       setPaused(false);
       setTimeLeftMs(ROUND_MS);
       const initialPair = createPair(modeRef.current);
@@ -250,6 +251,7 @@ export function useDoubleNumberEngine({
       setTimeLeftMs(ROUND_MS);
       remainingPhaseRef.current = null;
       phaseStartRef.current = null;
+      setTimedOut(false);
     }
 
     prevRunningRef.current = running;
@@ -339,6 +341,7 @@ export function useDoubleNumberEngine({
 
   const reset = useCallback(() => {
     timedOutRef.current = false;
+    setTimedOut(false);
     setTimeLeftMs(ROUND_MS);
     const nextPair = createPair(modeRef.current);
     setPair(nextPair);
@@ -366,6 +369,7 @@ export function useDoubleNumberEngine({
     paused,
     pause,
     resume,
-    reset
+    reset,
+    timedOut
   };
 }
