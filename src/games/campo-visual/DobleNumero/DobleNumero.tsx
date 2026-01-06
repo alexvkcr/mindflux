@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./DobleNumero.module.scss";
 import { CvControls } from "./components/CvControls";
 import { useDoubleNumberEngine, type ModeVariant } from "./hooks/useDoubleNumberEngine";
+import { clampSpeedLevel } from "./constants";
 import { formatCountdown } from "../../speed-reading/utils/formatCountdown";
 import { useRegisterControlsPortal } from "../../../contexts/ControlsPortalContext";
 
@@ -14,10 +15,10 @@ interface Props {
   onTimeout: () => void;
 }
 
-const clampLevel = (value: number) => Math.min(9, Math.max(1, Math.round(value)));
+const clampCvLevel = (value: number) => Math.min(9, Math.max(1, Math.round(value)));
 
 function getSeparationRatio(level: number): number {
-  const t = (clampLevel(level) - 1) / 8;
+  const t = (clampCvLevel(level) - 1) / 8;
   const MIN = 0.12;
   const MAX = 0.44;
   return MIN + (MAX - MIN) * t;
@@ -30,16 +31,16 @@ export function DobleNumero({
   boardH,
   onTimeout
 }: Props) {
-  const [speedLevel, setSpeedLevel] = useState(() => clampLevel(level));
-  const [difficultyLevel, setDifficultyLevel] = useState(() => clampLevel(level));
-  const [intervalLevel, setIntervalLevel] = useState(() => clampLevel(level));
+  const [speedLevel, setSpeedLevel] = useState(() => clampSpeedLevel(level));
+  const [difficultyLevel, setDifficultyLevel] = useState(() => clampCvLevel(level));
+  const [intervalLevel, setIntervalLevel] = useState(() => clampCvLevel(level));
   const [mode, setMode] = useState<ModeVariant>("numbers-2");
   const registerControlsPortal = useRegisterControlsPortal();
 
   useEffect(() => {
-    const nextLevel = clampLevel(level);
-    setSpeedLevel(nextLevel);
-    setIntervalLevel(nextLevel);
+    const nextInterval = clampCvLevel(level);
+    setSpeedLevel(clampSpeedLevel(level));
+    setIntervalLevel(nextInterval);
   }, [level]);
 
   const {
@@ -66,15 +67,15 @@ export function DobleNumero({
   }, [speedLevel, difficultyLevel, intervalLevel, mode, reset]);
 
   const handleSpeedChange = useCallback((next: number) => {
-    setSpeedLevel(clampLevel(next));
+    setSpeedLevel(clampSpeedLevel(next));
   }, []);
 
   const handleDifficultyChange = useCallback((next: number) => {
-    setDifficultyLevel(clampLevel(next));
+    setDifficultyLevel(clampCvLevel(next));
   }, []);
 
   const handleIntervalChange = useCallback((next: number) => {
-    setIntervalLevel(clampLevel(next));
+    setIntervalLevel(clampCvLevel(next));
   }, []);
 
   const handleModeChange = useCallback((nextMode: ModeVariant) => {

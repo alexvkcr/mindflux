@@ -1,18 +1,8 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const ROUND_MS = 45000;
+import { SPEED_TABLE, clampSpeedLevel } from "../constants";
 
-const SPEED_TABLE: Record<number, number> = {
-  1: 1000,
-  2: 800,
-  3: 650,
-  4: 520,
-  5: 420,
-  6: 340,
-  7: 280,
-  8: 240,
-  9: 200
-};
+const ROUND_MS = 45000;
 
 const INTERVAL_TABLE: Record<number, number> = {
   1: 1400,
@@ -66,7 +56,7 @@ export interface EngineState {
   reset: () => void;
 }
 
-function clampLevel(level: number): number {
+function clampIntervalLevel(level: number): number {
   return Math.min(9, Math.max(1, Math.round(level)));
 }
 
@@ -163,7 +153,7 @@ export function useDoubleNumberEngine({
   const [timeLeftMs, setTimeLeftMs] = useState(ROUND_MS);
   const [paused, setPaused] = useState(false);
 
-  const speedRef = useRef(clampLevel(speedLevel));
+  const speedRef = useRef(clampSpeedLevel(speedLevel));
   const modeRef = useRef<ModeVariant>(mode);
   const boardRef = useRef({ boardW, boardH });
 
@@ -177,12 +167,12 @@ export function useDoubleNumberEngine({
   const prevRunningRef = useRef(running);
 
   const showDuration = useMemo(() => {
-    const level = clampLevel(speedLevel);
+    const level = clampSpeedLevel(speedLevel);
     return SPEED_TABLE[level] ?? SPEED_TABLE[1];
   }, [speedLevel]);
 
   const intervalDuration = useMemo(() => {
-    const level = clampLevel(intervalLevel);
+    const level = clampIntervalLevel(intervalLevel);
     return INTERVAL_TABLE[level] ?? INTERVAL_TABLE[1];
   }, [intervalLevel]);
 
@@ -243,7 +233,7 @@ export function useDoubleNumberEngine({
   );
 
   useEffect(() => {
-    speedRef.current = clampLevel(speedLevel);
+    speedRef.current = clampSpeedLevel(speedLevel);
   }, [speedLevel]);
 
   useEffect(() => {
