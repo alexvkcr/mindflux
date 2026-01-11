@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./DobleNumero.module.scss";
 import { CvControls } from "./components/CvControls";
 import { useDoubleNumberEngine, type ModeVariant } from "./hooks/useDoubleNumberEngine";
-import { clampSpeedLevel, clampIntervalLevel } from "./constants";
+import { clampSpeedLevel, clampIntervalLevel, DEFAULT_ROUND_DURATION_SECONDS, type RoundDurationSeconds } from "./constants";
 import { formatCountdown } from "../../speed-reading/utils/formatCountdown";
 import { useRegisterControlsPortal } from "../../../contexts/ControlsPortalContext";
 
@@ -35,7 +35,10 @@ export function DobleNumero({
   const [difficultyLevel, setDifficultyLevel] = useState(() => clampCvLevel(level));
   const [intervalLevel, setIntervalLevel] = useState(() => clampIntervalLevel(level));
   const [mode, setMode] = useState<ModeVariant>("numbers-2");
+  const [roundDurationSeconds, setRoundDurationSeconds] = useState(DEFAULT_ROUND_DURATION_SECONDS);
   const registerControlsPortal = useRegisterControlsPortal();
+
+  const roundDurationMs = useMemo(() => roundDurationSeconds * 1000, [roundDurationSeconds]);
 
   useEffect(() => {
     const nextInterval = clampIntervalLevel(level);
@@ -59,12 +62,13 @@ export function DobleNumero({
     mode,
     running,
     boardW,
-    boardH
+    boardH,
+    roundDurationMs
   });
 
   useEffect(() => {
     reset();
-  }, [speedLevel, difficultyLevel, intervalLevel, mode, reset]);
+  }, [speedLevel, difficultyLevel, intervalLevel, mode, roundDurationMs, reset]);
 
   useEffect(() => {
     if (timedOut) {
@@ -82,6 +86,10 @@ export function DobleNumero({
 
   const handleIntervalChange = useCallback((next: number) => {
     setIntervalLevel(clampIntervalLevel(next));
+  }, []);
+
+  const handleRoundDurationChange = useCallback((nextSeconds: RoundDurationSeconds) => {
+    setRoundDurationSeconds(nextSeconds);
   }, []);
 
   const handleModeChange = useCallback((nextMode: ModeVariant) => {
@@ -111,6 +119,8 @@ export function DobleNumero({
         onSpeedChange={handleSpeedChange}
         onDifficultyChange={handleDifficultyChange}
         onIntervalChange={handleIntervalChange}
+        onRoundDurationChange={handleRoundDurationChange}
+        roundDurationSeconds={roundDurationSeconds}
         onModeChange={handleModeChange}
         onTogglePause={handleTogglePause}
       />
@@ -126,6 +136,8 @@ export function DobleNumero({
     handleSpeedChange,
     handleDifficultyChange,
     handleIntervalChange,
+    handleRoundDurationChange,
+    roundDurationSeconds,
     handleModeChange,
     handleTogglePause
   ]);

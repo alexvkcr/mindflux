@@ -1,8 +1,15 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { SPEED_TABLE, clampSpeedLevel, INTERVAL_TABLE, clampIntervalLevel } from "../constants";
 
-const ROUND_MS = 45000;
+const MIN_ROUND_DURATION_MS = 1000;
+
+function normalizeRoundDurationMs(value: number): number {
+  if (!Number.isFinite(value) || value <= 0) {
+    return MIN_ROUND_DURATION_MS;
+  }
+  return Math.max(MIN_ROUND_DURATION_MS, Math.round(value));
+}
 
 const VOWELS = "AEIOU";
 const CONSONANTS = "BCDFGHJKLMNPQRSTVWXYZ";
@@ -31,6 +38,7 @@ export interface EngineParams {
   running: boolean;
   boardW: number;
   boardH: number;
+  roundDurationMs: number;
 }
 
 export interface EngineState {
@@ -129,11 +137,14 @@ export function useDoubleNumberEngine({
   mode,
   running,
   boardW,
-  boardH
+  boardH,
+  roundDurationMs
 }: EngineParams): EngineState {
+  void _difficultyLevel;
+  const normalizedRoundDurationMs = normalizeRoundDurationMs(roundDurationMs);
   const [pair, setPair] = useState<NumberPair>(() => createPair(mode));
   const [phase, setPhase] = useState<Phase>("blank");
-  const [timeLeftMs, setTimeLeftMs] = useState(ROUND_MS);
+  const [timeLeftMs, setTimeLeftMs] = useState(normalizedRoundDurationMs);
   const [paused, setPaused] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
   const [clockSeed, setClockSeed] = useState(0);
@@ -238,7 +249,7 @@ export function useDoubleNumberEngine({
       timedOutRef.current = false;
       setTimedOut(false);
       setPaused(false);
-      setTimeLeftMs(ROUND_MS);
+      setTimeLeftMs(normalizedRoundDurationMs);
       const initialPair = createPair(modeRef.current);
       setPair(initialPair);
       setPhase("show");
@@ -248,14 +259,14 @@ export function useDoubleNumberEngine({
       stopAll();
       setPaused(false);
       setPhase("blank");
-      setTimeLeftMs(ROUND_MS);
+      setTimeLeftMs(normalizedRoundDurationMs);
       remainingPhaseRef.current = null;
       phaseStartRef.current = null;
       setTimedOut(false);
     }
 
     prevRunningRef.current = running;
-  }, [mode, running, stopAll]);
+  }, [mode, running, stopAll, normalizedRoundDurationMs]);
 
   useEffect(() => {
     if (!running || paused || timedOutRef.current) {
@@ -342,7 +353,7 @@ export function useDoubleNumberEngine({
   const reset = useCallback(() => {
     timedOutRef.current = false;
     setTimedOut(false);
-    setTimeLeftMs(ROUND_MS);
+    setTimeLeftMs(normalizedRoundDurationMs);
     const nextPair = createPair(modeRef.current);
     setPair(nextPair);
     setPaused(false);
@@ -353,7 +364,7 @@ export function useDoubleNumberEngine({
     if (running) {
       setClockSeed((prev) => prev + 1);
     }
-  }, [running, stopAll]);
+  }, [running, stopAll, normalizedRoundDurationMs]);
 
   useEffect(() => {
     if (!running) {
@@ -373,3 +384,5 @@ export function useDoubleNumberEngine({
     timedOut
   };
 }
+
+

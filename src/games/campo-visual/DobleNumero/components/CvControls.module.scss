@@ -1,4 +1,4 @@
-﻿@use '../../../../styles/variables' as vars;
+@use '../../../../styles/variables' as vars;
 
 .controls {
   display: flex;
@@ -62,3 +62,15 @@
     cursor: not-allowed;
   }
 }
+.compactGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.stretchControl {
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+

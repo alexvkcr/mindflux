@@ -2,7 +2,7 @@ import type { ChangeEvent } from "react";
 
 import styles from "./CvControls.module.scss";
 import type { ModeVariant } from "../hooks/useDoubleNumberEngine";
-import { SPEED_LEVEL_OPTIONS, INTERVAL_LEVEL_OPTIONS } from "../constants";
+import { SPEED_LEVEL_OPTIONS, INTERVAL_LEVEL_OPTIONS, ROUND_DURATION_OPTIONS_SECONDS, type RoundDurationSeconds } from "../constants";
 
 const LEVEL_OPTIONS = Array.from({ length: 9 }, (_, idx) => idx + 1);
 
@@ -21,9 +21,11 @@ export interface CvControlsProps {
   running: boolean;
   paused: boolean;
   mode: ModeVariant;
+  roundDurationSeconds: RoundDurationSeconds;
   onSpeedChange: (level: number) => void;
   onDifficultyChange: (level: number) => void;
   onIntervalChange: (level: number) => void;
+  onRoundDurationChange: (seconds: RoundDurationSeconds) => void;
   onModeChange: (mode: ModeVariant) => void;
   onTogglePause: () => void;
 }
@@ -35,9 +37,11 @@ export function CvControls({
   running,
   paused,
   mode,
+  roundDurationSeconds,
   onSpeedChange,
   onDifficultyChange,
   onIntervalChange,
+  onRoundDurationChange,
   onModeChange,
   onTogglePause
 }: CvControlsProps) {
@@ -51,6 +55,10 @@ export function CvControls({
 
   const handleIntervalChange = (event: ChangeEvent<HTMLSelectElement>) => {
     onIntervalChange(Number(event.target.value));
+  };
+
+  const handleRoundDurationChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    onRoundDurationChange(Number(event.target.value) as RoundDurationSeconds);
   };
 
   const handleModeChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -104,20 +112,37 @@ export function CvControls({
         </select>
       </label>
 
-      <label className={styles.control}>
-        <span className={styles.label}>Modo de estímulo</span>
-        <select
-          className={styles.select}
-          value={mode}
-          onChange={handleModeChange}
-        >
-          {MODE_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className={styles.compactGroup}>
+        <label className={`${styles.control} ${styles.stretchControl}`}>
+          <span className={styles.label}>Modo de estímulo</span>
+          <select
+            className={styles.select}
+            value={mode}
+            onChange={handleModeChange}
+          >
+            {MODE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className={`${styles.control} ${styles.stretchControl}`}>
+          <span className={styles.label}>Tiempo de partida</span>
+          <select
+            className={styles.select}
+            value={roundDurationSeconds}
+            onChange={handleRoundDurationChange}
+          >
+            {ROUND_DURATION_OPTIONS_SECONDS.map((seconds) => (
+              <option key={seconds} value={seconds}>
+                {seconds} segundos
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
 
       <button
         type="button"

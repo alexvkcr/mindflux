@@ -107,3 +107,16 @@ export function clampIntervalLevel(level: number): number {
   }
   return Math.min(MAX_INTERVAL_LEVEL, Math.max(MIN_INTERVAL_LEVEL, Math.round(level)));
 }
+
+export const ROUND_DURATION_OPTIONS_SECONDS = [
+  5,
+  10,
+  15,
+  20,
+  30,
+  45
+] as const;
+
+export type RoundDurationSeconds = (typeof ROUND_DURATION_OPTIONS_SECONDS)[number];
+
+export const DEFAULT_ROUND_DURATION_SECONDS = ROUND_DURATION_OPTIONS_SECONDS[ROUND_DURATION_OPTIONS_SECONDS.length - 1];
