@@ -3,6 +3,7 @@ import { t } from "../i18n";
 import styles from "./ControlsBar.module.scss";
 import { PrimaryButton } from "./ui/PrimaryButton";
 import { useControlsPortalNode } from "../contexts/ControlsPortalContext";
+import { EYE_MOVEMENT_MAX_LEVEL } from "../games/utils/speed";
 
 export type CategoryKey = "eyeMovement" | "speedReading" | "visualField" | "reactionTime" | "math";
 export type GameKey =
@@ -38,6 +39,8 @@ const CATEGORY_GAMES: Record<CategoryKey, GameKey[]> = {
 };
 
 const DEFAULT_BOOK: BookKey = "quijote";
+const DEFAULT_LEVEL_MIN = 1;
+const DEFAULT_LEVEL_MAX = 9;
 
 function ensureGame(category: CategoryKey, game: GameKey): GameKey {
   const candidates = CATEGORY_GAMES[category];
@@ -78,11 +81,14 @@ export function ControlsBar(props: {
 
   const effectiveGame = ensureGame(state.category, state.game);
   const isSpeedReading = state.category === "speedReading";
+  const isEyeMovement = state.category === "eyeMovement";
   const isIsoDistance = effectiveGame === "isoDistance";
   const isColumnReading = isSpeedReading && effectiveGame === "columnReading";
   const isDoubleNumber = state.category === "visualField" && effectiveGame === "doubleNumber";
   const isReactionCategory = state.category === "reactionTime";
   const isMathCategory = state.category === "math";
+  const levelMax = isEyeMovement ? EYE_MOVEMENT_MAX_LEVEL : DEFAULT_LEVEL_MAX;
+  const normalizedLevel = Math.min(levelMax, Math.max(DEFAULT_LEVEL_MIN, state.level));
 
   return (
     <section className={styles.controlsBar}>
@@ -150,14 +156,14 @@ export function ControlsBar(props: {
       {!isColumnReading && !isDoubleNumber && !isReactionCategory && !isMathCategory && (
         <div className={styles.level}>
           <label className={styles.label}>
-            {t.controls.levelLabel}: {state.level}
+            {t.controls.levelLabel}: {normalizedLevel}
           </label>
           <input
             className={styles.range}
             type="range"
-            min={1}
-            max={9}
-            value={state.level}
+            min={DEFAULT_LEVEL_MIN}
+            max={levelMax}
+            value={normalizedLevel}
             onChange={(e) => onChange({ level: Number(e.target.value) })}
           />
         </div>
