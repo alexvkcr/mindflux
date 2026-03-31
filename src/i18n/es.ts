@@ -20,6 +20,7 @@
     games: {
       basic: "Basico",
       isoDistance: "Seguimiento Isodistancia",
+      isoRhythm: "Ritmo Isom\u00e9trico",
       fixedReading: "Lectura Fija",
       columnReading: "Lectura en columnas",
       doubleNumber: "Doble numero",
@@ -39,5 +40,24 @@
     start: "Arranque",
     stop: "Alto",
     distanceLabel: "Distancia"
+  },
+  eyeRhythm: {
+    badges: {
+      speed: "Velocidad",
+      distance: "Distancia",
+      round: "Ronda",
+      state: "Estado"
+    },
+    states: {
+      idle: "Listo",
+      jumping: "Saltando",
+      resting: "Descanso"
+    },
+    controls: {
+      jumpsPerBlock: "Saltos por bloque",
+      restBetweenBlocks: "Descanso entre bloques",
+      totalRounds: "Rondas totales"
+    },
+    restNotice: "Descanso en progreso"
   }
 };

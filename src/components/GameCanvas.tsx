@@ -2,6 +2,7 @@ import { useRef, useState, useLayoutEffect, useCallback, useMemo, useEffect, typ
 import type { ControlsState, BookKey } from "./ControlsBar";
 import { EyeMovementBasic } from "../games/eye-movement/Basic";
 import { EyeMovementIsoDistance } from "../games/eye-movement/IsoDistance";
+import { EyeMovementIsoRhythm } from "../games/eye-movement/IsoRhythm";
 import { FixedReading } from "../games/speed-reading/FixedReading";
 import { ColumnReading } from "../games/speed-reading/ColumnReading/ColumnReading";
 import { ReadingControls } from "../games/speed-reading/components/ReadingControls";
@@ -301,6 +302,15 @@ export function GameCanvas({
             />
           ) : controls.game === "isoDistance" ? (
             <EyeMovementIsoDistance
+              distance={controls.distance ?? 3}
+              level={controls.level}
+              running={controls.running}
+              boardW={boardW}
+              boardH={boardH}
+              onTimeout={handleTimeout}
+            />
+          ) : controls.game === "isoRhythm" ? (
+            <EyeMovementIsoRhythm
               distance={controls.distance ?? 3}
               level={controls.level}
               running={controls.running}

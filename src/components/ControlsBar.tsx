@@ -9,6 +9,7 @@ export type CategoryKey = "eyeMovement" | "speedReading" | "visualField" | "reac
 export type GameKey =
   | "basic"
   | "isoDistance"
+  | "isoRhythm"
   | "fixedReading"
   | "columnReading"
   | "doubleNumber"
@@ -31,7 +32,7 @@ export type ControlsState = {
 };
 
 const CATEGORY_GAMES: Record<CategoryKey, GameKey[]> = {
-  eyeMovement: ["basic", "isoDistance"],
+  eyeMovement: ["basic", "isoDistance", "isoRhythm"],
   speedReading: ["fixedReading", "columnReading"],
   visualField: ["doubleNumber"],
   reactionTime: ["quickReflex", "quickMath", "grammarMatch"],
@@ -83,6 +84,8 @@ export function ControlsBar(props: {
   const isSpeedReading = state.category === "speedReading";
   const isEyeMovement = state.category === "eyeMovement";
   const isIsoDistance = effectiveGame === "isoDistance";
+  const isIsoRhythm = effectiveGame === "isoRhythm";
+  const usesDistanceSelector = isIsoDistance || isIsoRhythm;
   const isColumnReading = isSpeedReading && effectiveGame === "columnReading";
   const isDoubleNumber = state.category === "visualField" && effectiveGame === "doubleNumber";
   const isReactionCategory = state.category === "reactionTime";
@@ -137,19 +140,22 @@ export function ControlsBar(props: {
         </div>
       )}
 
-      {isIsoDistance && (
+      {usesDistanceSelector && (
         <div className={styles.level}>
           <label className={styles.label}>
             {t.controls.distanceLabel}: {state.distance ?? 3}
           </label>
-          <input
-            type="range"
-            min={1}
-            max={9}
+          <select
+            className={styles.select}
             value={state.distance ?? 3}
             onChange={(e) => onChange({ distance: Number(e.target.value) })}
-            className={styles.range}
-          />
+          >
+            {Array.from({ length: 9 }, (_, idx) => idx + 1).map((value) => (
+              <option key={value} value={value}>
+                Distancia {value}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
@@ -158,14 +164,28 @@ export function ControlsBar(props: {
           <label className={styles.label}>
             {t.controls.levelLabel}: {normalizedLevel}
           </label>
-          <input
-            className={styles.range}
-            type="range"
-            min={DEFAULT_LEVEL_MIN}
-            max={levelMax}
-            value={normalizedLevel}
-            onChange={(e) => onChange({ level: Number(e.target.value) })}
-          />
+          {isEyeMovement ? (
+            <select
+              className={styles.select}
+              value={normalizedLevel}
+              onChange={(e) => onChange({ level: Number(e.target.value) })}
+            >
+              {Array.from({ length: levelMax }, (_, idx) => idx + 1).map((value) => (
+                <option key={value} value={value}>
+                  Nivel {value}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              className={styles.range}
+              type="range"
+              min={DEFAULT_LEVEL_MIN}
+              max={levelMax}
+              value={normalizedLevel}
+              onChange={(e) => onChange({ level: Number(e.target.value) })}
+            />
+          )}
         </div>
       )}
 
