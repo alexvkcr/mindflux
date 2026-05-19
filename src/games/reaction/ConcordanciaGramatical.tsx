@@ -26,6 +26,29 @@ const MAX_VISIBILITY_MS = 2000;
 
 const MIN_VISIBILITY_MS = 250;
 
+const ATTEMPTS_PER_ROUND = 10;
+
+function randomItem<T>(items: T[]): T {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function shuffle<T>(items: T[]): T[] {
+  const copy = [...items];
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+  }
+  return copy;
+}
+
+function buildMatchPlan(attempts: number): boolean[] {
+  const matchCount = Math.floor(attempts / 2);
+  const mismatchCount = attempts - matchCount;
+  return shuffle([
+    ...Array.from({ length: matchCount }, () => true),
+    ...Array.from({ length: mismatchCount }, () => false)
+  ]);
+}
 
 
 function clampLevel(value: number) {
@@ -36,13 +59,20 @@ function clampLevel(value: number) {
 
 
 
-function mapDistanceToGap(level: number) {
-  const clamped = clampLevel(level);
-  const MIN_PERCENT = 5;
-  const MAX_PERCENT = 90;
-  return MIN_PERCENT + ((clamped - 1) / (LEVEL_MAX - 1)) * (MAX_PERCENT - MIN_PERCENT);
-}
-
+function mapDistanceToGap(level: number) {
+
+  const clamped = clampLevel(level);
+
+  const MIN_PERCENT = 15;
+
+  const MAX_PERCENT = 360;
+
+  return MIN_PERCENT + ((clamped - 1) / (LEVEL_MAX - 1)) * (MAX_PERCENT - MIN_PERCENT);
+
+}
+
+
+
 function mapVisibility(level: number) {
 
   const t = (clampLevel(level) - 1) / (LEVEL_MAX - 1);
@@ -67,17 +97,29 @@ export function ConcordanciaGramatical({ running, onTimeout }: ConcordanciaGrama
   const [wordsHidden, setWordsHidden] = useState(true);
   const registerControlsPortal = useRegisterControlsPortal();
   const awaitingRef = useRef(false);
+  const matchPlanRef = useRef<boolean[]>(buildMatchPlan(ATTEMPTS_PER_ROUND));
   const { start: startVisibilityTimer, cancel: cancelVisibilityTimer } = usePausableTimeout(explanationOpen);
 
-  const handleStimulus = useCallback(() => {
-    const article = ARTICLES[Math.floor(Math.random() * ARTICLES.length)];
+  const handleStimulus = useCallback((attemptIndex: number) => {
+    const article = randomItem(ARTICLES);
     const categories = Object.keys(NOUNS) as GrammarCategory[];
-    const nounCategory = categories[Math.floor(Math.random() * categories.length)];
+    const shouldMatch = matchPlanRef.current[attemptIndex - 1] ?? false;
+    const nounCategory = shouldMatch
+      ? article.category
+      : randomItem(categories.filter((category) => category !== article.category));
     const nouns = NOUNS[nounCategory];
-    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    const noun = randomItem(nouns);
     setPair({ article: article.value, articleCategory: article.category, noun, nounCategory });
     setWordsHidden(false);
   }, []);
+
+  useEffect(() => {
+    if (running) {
+      matchPlanRef.current = buildMatchPlan(ATTEMPTS_PER_ROUND);
+    } else {
+      matchPlanRef.current = [];
+    }
+  }, [running]);
 
   const {
     attempt,
@@ -90,6 +132,7 @@ export function ConcordanciaGramatical({ running, onTimeout }: ConcordanciaGrama
     registerResponse
   } = useReactionSequence({
     running,
+    attempts: ATTEMPTS_PER_ROUND,
     paused: explanationOpen,
     waitRangeMs: WAIT_RANGE_MS,
     onStimulus: handleStimulus,
