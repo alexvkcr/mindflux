@@ -1,4 +1,6 @@
-import type { MiniLesson, MiniLessonFrequencyMap } from "../types";
+import type { MiniLesson } from "../types";
+
+type MiniLessonFrequencyMap = Readonly<Record<string, number>>;
 
 function normalizeKey(value: unknown): string | null {
   if (typeof value !== "string" && typeof value !== "number") {
@@ -13,8 +15,6 @@ function getFrequencyKeys(lesson: MiniLesson, index: number): string[] {
   const keys = [
     normalizeKey(lesson.id),
     normalizeKey(lesson.number),
-    normalizeKey(lesson.lessonNumber),
-    normalizeKey(lesson.lesson),
     normalizeKey(lesson.title),
     normalizeKey(index + 1)
   ];

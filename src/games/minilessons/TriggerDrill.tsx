@@ -33,7 +33,7 @@ function toText(value: unknown): string | null {
   return null;
 }
 
-function getFirstText(lesson: MiniLesson, keys: readonly string[]): string | null {
+function getFirstText(lesson: MiniLesson, keys: readonly (keyof MiniLesson)[]): string | null {
   for (const key of keys) {
     const text = toText(lesson[key]);
     if (text) {
@@ -54,16 +54,16 @@ function normalizeExamples(value: unknown): string[] {
 }
 
 function getLessonNumber(lesson: MiniLesson, fallbackIndex: number): string {
-  return getFirstText(lesson, ["number", "lessonNumber", "lesson", "id"]) ?? String(fallbackIndex + 1);
+  return getFirstText(lesson, ["number", "id"]) ?? String(fallbackIndex + 1);
 }
 
 function getLessonTitle(lesson: MiniLesson, lessonNumber: string): string {
-  return getFirstText(lesson, ["title", "name"]) ?? `Minileccion ${lessonNumber}`;
+  return getFirstText(lesson, ["title"]) ?? `Minileccion ${lessonNumber}`;
 }
 
 function getPrompt(lesson: MiniLesson): string {
   return (
-    getFirstText(lesson, ["prompt", "situation", "scenario", "context"]) ??
+    getFirstText(lesson, ["prompt"]) ??
     "Anade un prompt o situacion en MINI_LESSONS."
   );
 }
@@ -149,11 +149,7 @@ export function TriggerDrill() {
   const core = getFirstText(currentLesson, ["core"]);
   const rule = getFirstText(currentLesson, ["rule"]);
   const note = getFirstText(currentLesson, ["note"]);
-  const examples = [
-    ...normalizeExamples(currentLesson.examples),
-    ...normalizeExamples(currentLesson.example),
-    ...normalizeExamples(currentLesson.phrases)
-  ];
+  const examples = normalizeExamples(currentLesson.examples);
   const showTitleBeforeReveal = mode === "exact";
 
   return (
