@@ -1,0 +1,277 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as mix;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  gap: 14px;
+  box-sizing: border-box;
+  color: #f6f7fb;
+  overflow: auto;
+}
+
+.topBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  flex: 1 1 420px;
+}
+
+.stat {
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.statLabel {
+  display: block;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.74rem;
+  line-height: 1.2;
+}
+
+.statValue {
+  display: block;
+  margin-top: 2px;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.modeControl {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 0 1 190px;
+}
+
+.label {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.select {
+  width: 100%;
+  padding: 8px 10px;
+  color: $text;
+  background: $bg-1;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  @include mix.focus-ring;
+}
+
+.card {
+  flex: 1 1 auto;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.18));
+  overflow: auto;
+}
+
+.cardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lessonMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.mutedBadge {
+  color: rgba(255, 255, 255, 0.62);
+  font-weight: 600;
+}
+
+.promptBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  flex: 1 1 auto;
+}
+
+.eyebrow {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.prompt {
+  margin: 0;
+  font-size: clamp(1.2rem, 3vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.trigger {
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 3px solid #5ce69b;
+  background: rgba(92, 230, 155, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 1rem;
+}
+
+.solution {
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.solutionTitle {
+  margin: 0;
+  font-size: clamp(1.2rem, 2.5vw, 1.7rem);
+  line-height: 1.2;
+}
+
+.detail {
+  display: grid;
+  gap: 4px;
+}
+
+.detailLabel {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.detailText {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.45;
+}
+
+.examples {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.examples li {
+  line-height: 1.4;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.actionButton {
+  min-width: 120px;
+  min-height: 44px;
+  font-weight: 700;
+}
+
+.secondaryButton,
+.successButton,
+.failButton {
+  min-width: 120px;
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  @include mix.focus-ring;
+}
+
+.secondaryButton {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.successButton {
+  background: rgba(46, 160, 89, 0.9);
+}
+
+.failButton {
+  background: rgba(199, 61, 61, 0.92);
+}
+
+.secondaryButton:hover,
+.successButton:hover,
+.failButton:hover {
+  border-color: rgba(255, 255, 255, 0.58);
+}
+
+.secondaryButton:disabled,
+.successButton:disabled,
+.failButton:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.emptyState {
+  margin: auto;
+  max-width: 520px;
+  color: rgba(255, 255, 255, 0.78);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 14px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-basis: 100%;
+  }
+
+  .modeControl {
+    flex-basis: 100%;
+  }
+
+  .card {
+    min-height: 260px;
+  }
+
+  .actions button,
+  .actionButton,
+  .secondaryButton,
+  .successButton,
+  .failButton {
+    flex: 1 1 140px;
+  }
+}

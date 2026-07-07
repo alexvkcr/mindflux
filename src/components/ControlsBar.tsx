@@ -5,7 +5,7 @@ import { PrimaryButton } from "./ui/PrimaryButton";
 import { useControlsPortalNode } from "../contexts/ControlsPortalContext";
 import { EYE_MOVEMENT_MAX_LEVEL } from "../games/utils/speed";
 
-export type CategoryKey = "eyeMovement" | "speedReading" | "visualField" | "reactionTime" | "math";
+export type CategoryKey = "eyeMovement" | "speedReading" | "visualField" | "reactionTime" | "math" | "miniLessons";
 export type GameKey =
   | "basic"
   | "isoDistance"
@@ -18,7 +18,8 @@ export type GameKey =
   | "grammarMatch"
   | "mathChain"
   | "mentalCount"
-  | "hiLoCount";
+  | "hiLoCount"
+  | "triggerDrill";
 export type BookKey = "quijote" | "regenta" | "colmena";
 
 export type ControlsState = {
@@ -36,7 +37,8 @@ const CATEGORY_GAMES: Record<CategoryKey, GameKey[]> = {
   speedReading: ["fixedReading", "columnReading"],
   visualField: ["doubleNumber"],
   reactionTime: ["quickReflex", "quickMath", "grammarMatch"],
-  math: ["mathChain", "mentalCount", "hiLoCount"]
+  math: ["mathChain", "mentalCount", "hiLoCount"],
+  miniLessons: ["triggerDrill"]
 };
 
 const DEFAULT_BOOK: BookKey = "quijote";
@@ -63,7 +65,8 @@ export function ControlsBar(props: {
     const nextGame = CATEGORY_GAMES[nextCategory][0];
     const nextState: Partial<ControlsState> = {
       category: nextCategory,
-      game: nextGame
+      game: nextGame,
+      running: nextCategory === "miniLessons" ? false : state.running
     };
 
     if (nextCategory === "speedReading") {
@@ -90,6 +93,7 @@ export function ControlsBar(props: {
   const isDoubleNumber = state.category === "visualField" && effectiveGame === "doubleNumber";
   const isReactionCategory = state.category === "reactionTime";
   const isMathCategory = state.category === "math";
+  const isMiniLessonCategory = state.category === "miniLessons";
   const levelMax = isEyeMovement ? EYE_MOVEMENT_MAX_LEVEL : DEFAULT_LEVEL_MAX;
   const normalizedLevel = Math.min(levelMax, Math.max(DEFAULT_LEVEL_MIN, state.level));
 
@@ -107,6 +111,7 @@ export function ControlsBar(props: {
           <option value="visualField">{t.controls.categories.visualField}</option>
           <option value="reactionTime">{t.controls.categories.reactionTime}</option>
           <option value="math">{t.controls.categories.math}</option>
+          <option value="miniLessons">{t.controls.categories.miniLessons}</option>
         </select>
       </div>
 
@@ -159,7 +164,7 @@ export function ControlsBar(props: {
         </div>
       )}
 
-      {!isColumnReading && !isDoubleNumber && !isReactionCategory && !isMathCategory && (
+      {!isColumnReading && !isDoubleNumber && !isReactionCategory && !isMathCategory && !isMiniLessonCategory && (
         <div className={styles.level}>
           <label className={styles.label}>
             {t.controls.levelLabel}: {normalizedLevel}
@@ -189,7 +194,7 @@ export function ControlsBar(props: {
         </div>
       )}
 
-      {!isColumnReading && (
+      {!isColumnReading && !isMiniLessonCategory && (
         <div className={styles.action}>
           <div className={styles.actionRow}>
             <PrimaryButton

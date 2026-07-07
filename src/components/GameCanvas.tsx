@@ -13,6 +13,7 @@ import { ConcordanciaGramatical } from "../games/reaction/ConcordanciaGramatical
 import { SumaCadena } from "../games/math/SumaCadena";
 import { CuentaMental } from "../games/math/CuentaMental";
 import { ConteoHiLo } from "../games/math/ConteoHiLo";
+import { TriggerDrill } from "../games/minilessons/TriggerDrill";
 import { useColumnHighlightEngine } from "../games/speed-reading/ColumnReading/hooks/useColumnHighlightEngine";
 import { levelToWpm } from "../games/speed-reading/utils/wpm";
 import { texts } from "../games/speed-reading/texts";
@@ -368,6 +369,10 @@ export function GameCanvas({
 
         {controls.category === "reactionTime" && controls.game === "grammarMatch" && (
           <ConcordanciaGramatical running={controls.running} boardW={boardW} boardH={boardH} onTimeout={handleTimeout} />
+        )}
+
+        {controls.category === "miniLessons" && controls.game === "triggerDrill" && (
+          <TriggerDrill />
         )}
       </div>
     </section>
