@@ -4,7 +4,7 @@ import controlStyles from "../reaction/ReactionControls.module.scss";
 import { PrimaryButton } from "../../components/ui/PrimaryButton";
 import { Modal } from "../../components/ui/Modal";
 import { useRegisterControlsPortal } from "../../contexts/ControlsPortalContext";
-import { levelToCount, levelToIntervalMs } from "./utils";
+import { START_COUNTDOWN_SECONDS, levelToCount, levelToIntervalMs } from "./utils";
 import { MathProgressBar } from "./components/MathProgressBar";
 
 interface MathGameProps {
@@ -14,7 +14,7 @@ interface MathGameProps {
   onTimeout: () => void;
 }
 
-type Stage = "idle" | "show" | "input" | "result";
+type Stage = "idle" | "countdown" | "show" | "input" | "result";
 
 export function SumaCadena({ running, onTimeout }: MathGameProps) {
   const [quantityLevel, setQuantityLevel] = useState(3);
@@ -26,6 +26,7 @@ export function SumaCadena({ running, onTimeout }: MathGameProps) {
   const [feedback, setFeedback] = useState<{ text: string; ok: boolean | null }>({ text: "", ok: null });
   const [explanationOpen, setExplanationOpen] = useState(false);
   const [barKey, setBarKey] = useState(0);
+  const [countdown, setCountdown] = useState(0);
 
   const timerRef = useRef<number | null>(null);
   const totalRef = useRef(0);
@@ -35,14 +36,14 @@ export function SumaCadena({ running, onTimeout }: MathGameProps) {
 
   const digitsCount = useMemo(() => levelToCount(quantityLevel), [quantityLevel]);
   const intervalMs = useMemo(() => levelToIntervalMs(speedLevel), [speedLevel]);
-  const disableControls = stage === "show" || stage === "input" || running;
+  const disableControls = stage === "countdown" || stage === "show" || stage === "input" || running;
 
-  const clearTimer = () => {
+  const clearTimer = useCallback(() => {
     if (timerRef.current !== null) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-  };
+  }, []);
 
   const resetGame = useCallback(() => {
     clearTimer();
@@ -52,7 +53,8 @@ export function SumaCadena({ running, onTimeout }: MathGameProps) {
     setUserAnswer("");
     setFeedback({ text: "", ok: null });
     setBarKey(0);
-  }, []);
+    setCountdown(0);
+  }, [clearTimer]);
 
   const runSequence = useCallback(
     (digits: number[]) => {
@@ -90,7 +92,31 @@ export function SumaCadena({ running, onTimeout }: MathGameProps) {
     const nextSequence = Array.from({ length: digitsCount }, () => Math.floor(Math.random() * 10));
     totalRef.current = nextSequence.reduce((sum, digit) => sum + digit, 0);
     runSequence(nextSequence);
-  }, [digitsCount, runSequence]);
+  }, [clearTimer, digitsCount, runSequence]);
+
+  const startCountdown = useCallback(() => {
+    clearTimer();
+    setStage("countdown");
+    setCurrentDigit(null);
+    setDigitsShown(0);
+    setUserAnswer("");
+    setFeedback({ text: "", ok: null });
+    setCountdown(START_COUNTDOWN_SECONDS);
+
+    let remaining = START_COUNTDOWN_SECONDS;
+    const tick = () => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        setCountdown(0);
+        startRound();
+        return;
+      }
+      setCountdown(remaining);
+      timerRef.current = window.setTimeout(tick, 1000);
+    };
+
+    timerRef.current = window.setTimeout(tick, 1000);
+  }, [clearTimer, startRound]);
 
   useEffect(() => {
     stageRef.current = stage;
@@ -99,11 +125,11 @@ export function SumaCadena({ running, onTimeout }: MathGameProps) {
   useEffect(() => {
     if (running) {
       resetGame();
-      startRound();
+      startCountdown();
     } else if (stageRef.current !== "result") {
       resetGame();
     }
-  }, [resetGame, running, startRound]);
+  }, [resetGame, running, startCountdown]);
 
   useEffect(() => {
     registerControlsPortal(
@@ -139,7 +165,7 @@ export function SumaCadena({ running, onTimeout }: MathGameProps) {
   useEffect(() => () => {
     clearTimer();
     registerControlsPortal(null);
-  }, [registerControlsPortal]);
+  }, [clearTimer, registerControlsPortal]);
 
   useEffect(() => {
     if (stage === "result") {
@@ -182,6 +208,13 @@ export function SumaCadena({ running, onTimeout }: MathGameProps) {
       <p className={styles.instructions}>Observa cada digito y suma mentalmente. Al final escribe el resultado total.</p>
 
       <div className={styles.board}>
+        {stage === "countdown" && (
+          <div className={styles.countdownPanel} aria-live="polite">
+            <p className={styles.cooldown}>Comenzando en</p>
+            <span className={styles.countdownNumber}>{countdown}</span>
+          </div>
+        )}
+
         {stage === "show" && (
           <div>
             <div className={styles.digitDisplay} aria-live="polite">

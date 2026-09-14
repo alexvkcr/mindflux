@@ -272,7 +272,9 @@ export function GameCanvas({
   }, [onChange]);
 
   const isColumnReadingGame = controls.category === "speedReading" && controls.game === "columnReading";
-  const shouldGrowWithContent = controls.category === "visualField" && controls.game === "doubleNumber";
+  const shouldGrowWithContent =
+    (controls.category === "visualField" && controls.game === "doubleNumber") ||
+    controls.category === "math";
   const boardClassName = [
     styles.board,
     isColumnReadingGame ? styles.noFrame : "",

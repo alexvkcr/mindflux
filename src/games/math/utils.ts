@@ -1,6 +1,9 @@
 const LEVEL_MIN = 1;
 const LEVEL_MAX = 9;
 
+export const START_COUNTDOWN_SECONDS = 3;
+export const BETWEEN_BLOCK_COUNTDOWN_SECONDS = 5;
+
 export function clampLevel(value: number): number {
   return Math.min(LEVEL_MAX, Math.max(LEVEL_MIN, Math.round(value)));
 }

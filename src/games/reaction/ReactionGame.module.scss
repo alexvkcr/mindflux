@@ -54,8 +54,8 @@
 }
 
 .board {
-  flex: 1;
-  min-height: 100px;
+  flex: 1 0 auto;
+  min-height: clamp(260px, 46dvh, 420px);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: radial-gradient(circle at top, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.25));
@@ -64,6 +64,8 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
+  padding: 18px;
+  text-align: center;
 }
 
 .summary {
@@ -91,4 +93,44 @@
   text-align: center;
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.9rem;
+}
+
+@media (max-width: 520px) {
+  .container {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .topBar {
+    align-items: stretch;
+  }
+
+  .badges {
+    width: 100%;
+  }
+
+  .badge {
+    flex: 1 1 140px;
+    padding-inline: 10px;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .explanationBtn {
+    width: 100%;
+  }
+
+  .instructions {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .feedback {
+    margin: 0;
+  }
+
+  .board {
+    min-height: clamp(300px, 50dvh, 460px);
+    padding: 16px;
+  }
 }

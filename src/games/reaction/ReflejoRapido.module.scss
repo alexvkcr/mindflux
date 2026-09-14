@@ -1,7 +1,15 @@
+.tapBoard {
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .circle {
-  width: min(60px, 15vw);
+  width: clamp(64px, 18vw, 88px);
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, #5ce69b, #1c7f55);
   box-shadow: 0 0 50px rgba(92, 230, 155, 0.6);
+  pointer-events: none;
 }

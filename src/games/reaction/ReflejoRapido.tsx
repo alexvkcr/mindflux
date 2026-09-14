@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type PointerEvent } from "react";
 import { CountdownSemaphore } from "./components/CountdownSemaphore";
 import { useReactionSequence } from "./hooks/useReactionSequence";
 import styles from "./ReactionGame.module.scss";
@@ -41,27 +41,39 @@ export function ReflejoRapido({ running, onTimeout }: ReflejoRapidoProps) {
     }
   }, [phase]);
 
+  const handleStimulusResponse = useCallback(() => {
+    if (!awaitingResponse || phase !== "stimulus" || explanationOpen) {
+      return false;
+    }
+    setStimulusVisible(false);
+    registerResponse({ success: true, label: "Correcto" });
+    return true;
+  }, [awaitingResponse, explanationOpen, phase, registerResponse]);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const isZeroKey = event.code === "Digit0" || event.code === "Numpad0";
       if (!isZeroKey) {
         return;
       }
-      if (!awaitingResponse || phase !== "stimulus" || explanationOpen) {
-        return;
+      if (handleStimulusResponse()) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.stopImmediatePropagation) {
+          event.stopImmediatePropagation();
+        }
       }
-      event.preventDefault();
-      event.stopPropagation();
-      if (event.stopImmediatePropagation) {
-        event.stopImmediatePropagation();
-      }
-      setStimulusVisible(false);
-      registerResponse({ success: true, label: "Correcto" });
     };
 
     window.addEventListener("keydown", handleKeyDown, true);
     return () => window.removeEventListener("keydown", handleKeyDown, true);
-  }, [awaitingResponse, explanationOpen, phase, registerResponse]);
+  }, [handleStimulusResponse]);
+
+  const handleBoardPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (handleStimulusResponse()) {
+      event.preventDefault();
+    }
+  };
 
   const progressLabel = attempt > 0 ? `Intento ${Math.min(attempt, totalAttempts)}/${totalAttempts}` : `Listo para ${totalAttempts} intentos`;
 
@@ -94,13 +106,17 @@ export function ReflejoRapido({ running, onTimeout }: ReflejoRapidoProps) {
         </button>
       </div>
 
-      <p className={styles.instructions}>Espera al semaforo, observa el circulo y pulsa la tecla 0 (fila superior o teclado numerico) tan rapido como puedas.</p>
+      <p className={styles.instructions}>Espera al semaforo, observa el circulo y toca la caja o pulsa la tecla 0 tan rapido como puedas.</p>
 
       <CountdownSemaphore stage={countdownStage} />
 
       <p className={`${styles.feedback} ${feedbackClass}`}>{feedbackText}</p>
 
-      <div className={styles.board}>
+      <div
+        className={`${styles.board} ${circleStyles.tapBoard}`}
+        onPointerDown={handleBoardPointerDown}
+        aria-label="Area de respuesta del reflejo rapido"
+      >
         {stimulusVisible && <div className={circleStyles.circle} />}
         {!running && phase === "idle" && (
           <p className={styles.helperText}>Pulsa "Arranque" para comenzar.</p>
@@ -114,7 +130,7 @@ export function ReflejoRapido({ running, onTimeout }: ReflejoRapidoProps) {
       <Modal open={explanationOpen} title="Reflejo Rapido" onClose={() => setExplanationOpen(false)}>
         <ul>
           <li>Cada intento inicia con un semaforo de 3 segundos seguido de una espera aleatoria de 1 a 5 segundos.</li>
-          <li>Cuando aparezca el circulo, presiona la tecla 0 (arriba o en el teclado numerico) de inmediato.</li>
+          <li>Cuando aparezca el circulo, toca la caja del estimulo o presiona la tecla 0 de inmediato.</li>
           <li>Dispones de 2 segundos por intento; si no respondes se registran 2000 ms como penalizacion.</li>
           <li>Completa los 10 intentos para conocer tu tiempo medio de reaccion.</li>
         </ul>

@@ -38,8 +38,8 @@
 }
 
 .board {
-  flex: 1;
-  min-height: 0;
+  flex: 1 0 auto;
+  min-height: clamp(260px, 48dvh, 420px);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: radial-gradient(circle at top, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.25));
@@ -50,6 +50,10 @@
   overflow: hidden;
   padding: 20px;
   text-align: center;
+}
+
+.board > div {
+  width: min(100%, 520px);
 }
 
 .digitDisplay,
@@ -68,6 +72,7 @@
   flex-direction: column;
   gap: 12px;
   align-items: center;
+  width: min(100%, 520px);
 }
 
 .inputRow input {
@@ -75,7 +80,7 @@
   border-radius: 8px;
   border: none;
   font-size: 1rem;
-  width: min(240px, 80%);
+  width: min(240px, 100%);
   text-align: center;
 }
 
@@ -122,11 +127,12 @@
 }
 
 .progressTrack {
-  width: min(460px, 90%);
+  width: min(460px, 100%);
   height: 10px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.2);
   overflow: hidden;
+  margin-inline: auto;
   margin-top: 12px;
 }
 
@@ -152,6 +158,26 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
+.countdownPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.countdownPanel .cooldown {
+  margin: 0;
+}
+
+.countdownNumber {
+  font-size: clamp(72px, 20vw, 150px);
+  line-height: 1;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 0 28px rgba(92, 230, 155, 0.32);
+}
+
 .countInfo {
   font-size: 1rem;
   color: rgba(255, 255, 255, 0.82);
@@ -170,4 +196,47 @@
 .explanationBtn:hover,
 .explanationBtn:focus-visible {
   background: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 520px) {
+  .container {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .topBar {
+    align-items: stretch;
+  }
+
+  .badges {
+    width: 100%;
+  }
+
+  .badge {
+    flex: 1 1 130px;
+    padding-inline: 10px;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .explanationBtn {
+    width: 100%;
+  }
+
+  .instructions {
+    margin: 0;
+  }
+
+  .board {
+    min-height: clamp(300px, 52dvh, 460px);
+    padding: 16px;
+  }
+
+  .responseButtons {
+    width: 100%;
+  }
+
+  .responseButtons button {
+    width: 100%;
+  }
 }

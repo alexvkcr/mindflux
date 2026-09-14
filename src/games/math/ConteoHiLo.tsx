@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./MathGame.module.scss";
 import controlStyles from "../reaction/ReactionControls.module.scss";
-import { BLOCK_SIZE_OPTIONS, levelToIntervalMs } from "./utils";
+import { BETWEEN_BLOCK_COUNTDOWN_SECONDS, BLOCK_SIZE_OPTIONS, START_COUNTDOWN_SECONDS, levelToIntervalMs } from "./utils";
 import { useRegisterControlsPortal } from "../../contexts/ControlsPortalContext";
 import { MathProgressBar } from "./components/MathProgressBar";
 import { Modal } from "../../components/ui/Modal";
@@ -13,7 +13,7 @@ interface MathGameProps {
   onTimeout: () => void;
 }
 
-type Phase = "idle" | "show" | "answer" | "cooldown" | "ended";
+type Phase = "idle" | "countdown" | "show" | "answer" | "cooldown" | "ended";
 
 const SHOE_OPTIONS = [
   { label: "1 mazo", value: 1 },
@@ -74,7 +74,7 @@ export function ConteoHiLo({ running, onTimeout }: MathGameProps) {
   const registerControlsPortal = useRegisterControlsPortal();
 
   const intervalMs = useMemo(() => levelToIntervalMs(speedLevel), [speedLevel]);
-  const controlsDisabled = running || phase === "show" || phase === "answer" || phase === "cooldown";
+  const controlsDisabled = running || phase === "countdown" || phase === "show" || phase === "answer" || phase === "cooldown";
 
   const clearTimers = useCallback(() => {
     timersRef.current.forEach((id) => window.clearTimeout(id));
@@ -154,12 +154,42 @@ export function ConteoHiLo({ running, onTimeout }: MathGameProps) {
     playNext();
   }, [blockSize, clearTimers, drawCard, intervalMs, scheduleTimeout]);
 
+  const startBlockAfterCountdown = useCallback(
+    (nextPhase: "countdown" | "cooldown", seconds: number) => {
+      clearTimers();
+      setPhase(nextPhase);
+      setCurrentCard(null);
+      setCooldown(seconds);
+
+      let remaining = seconds;
+      const tick = () => {
+        if (!runningRef.current) {
+          return;
+        }
+        remaining -= 1;
+        if (remaining <= 0) {
+          setCooldown(0);
+          startBlock();
+          return;
+        }
+        setCooldown(remaining);
+        scheduleTimeout(tick, 1000);
+      };
+
+      scheduleTimeout(tick, 1000);
+    },
+    [clearTimers, scheduleTimeout, startBlock]
+  );
+
   const startGame = useCallback(() => {
     countRef.current = 0;
     buildShoe();
     setFeedback("");
-    startBlock();
-  }, [buildShoe, startBlock]);
+    setInputValue("");
+    setValuesShown(0);
+    blockIndexRef.current = 0;
+    startBlockAfterCountdown("countdown", START_COUNTDOWN_SECONDS);
+  }, [buildShoe, startBlockAfterCountdown]);
 
   const finishGame = useCallback(() => {
     clearTimers();
@@ -262,23 +292,7 @@ export function ConteoHiLo({ running, onTimeout }: MathGameProps) {
     if (guess === null) {
       return;
     }
-    setPhase("cooldown");
-    setCooldown(5);
-    const tick = () => {
-      setCooldown((prev) => {
-        if (prev <= 1) {
-          clearTimers();
-          startBlock();
-          return 0;
-        }
-        const next = prev - 1;
-        const id = window.setTimeout(tick, 1000);
-        timersRef.current.push(id);
-        return next;
-      });
-    };
-    const id = window.setTimeout(tick, 1000);
-    timersRef.current.push(id);
+    startBlockAfterCountdown("cooldown", BETWEEN_BLOCK_COUNTDOWN_SECONDS);
   };
 
   const showProgressBar = phase === "show" && currentCard !== null;
@@ -300,6 +314,13 @@ export function ConteoHiLo({ running, onTimeout }: MathGameProps) {
 
       <div className={styles.board}>
         {phase === "idle" && <p className={styles.helperText}>Pulsa "Arranque" para comenzar el conteo.</p>}
+
+        {phase === "countdown" && (
+          <div className={styles.countdownPanel} aria-live="polite">
+            <p className={styles.cooldown}>Comenzando en</p>
+            <span className={styles.countdownNumber}>{cooldown}</span>
+          </div>
+        )}
 
         {phase === "show" && (
           <div>
