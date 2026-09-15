@@ -1,0 +1,239 @@
+@use '../../../styles/variables' as vars;
+
+.container {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  color: vars.$text;
+  box-sizing: border-box;
+}
+
+.topBar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.targetBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.targetLabel {
+  color: vars.$text-dim;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.targetValue {
+  min-width: 2.4em;
+  padding: 4px 12px;
+  border-radius: 8px;
+  background: rgba(92, 230, 155, 0.16);
+  color: #7ff0af;
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  line-height: 1.1;
+  font-weight: 800;
+  text-align: center;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.explanationBtn {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.explanationBtn:hover,
+.explanationBtn:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.board {
+  flex: 1 0 auto;
+  min-height: clamp(320px, 58dvh, 620px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.25));
+  overflow: hidden;
+  text-align: center;
+}
+
+.grid {
+  --gap: clamp(6px, 1.8vmin, 12px);
+
+  width: min(100%, 92vmin, 620px);
+  max-height: min(100%, 70dvh);
+  aspect-ratio: var(--cols) / var(--rows);
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
+  gap: var(--gap);
+}
+
+.countdownPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.countdownNumber {
+  font-size: clamp(78px, 22vmin, 160px);
+  line-height: 1;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 0 28px rgba(92, 230, 155, 0.34);
+}
+
+.cell {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: clamp(1.25rem, 7vmin, 2.5rem);
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease, opacity 120ms ease;
+}
+
+.cell:hover:not(:disabled),
+.cell:focus-visible:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.cell:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.cell:disabled {
+  opacity: 0.28;
+  cursor: default;
+  color: rgba(255, 255, 255, 0.45);
+  background: rgba(92, 230, 155, 0.12);
+  border-color: rgba(92, 230, 155, 0.24);
+}
+
+.cell[data-wrong="true"]:not(:disabled) {
+  background: rgba(245, 129, 129, 0.22);
+  border-color: rgba(245, 129, 129, 0.7);
+}
+
+.helperText {
+  max-width: 32rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.95rem;
+}
+
+.summary {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.84);
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .topBar {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .targetBox,
+  .badges {
+    justify-content: center;
+  }
+
+  .badge {
+    flex: 1 1 120px;
+    text-align: center;
+  }
+
+  .explanationBtn {
+    width: 100%;
+  }
+
+  .board {
+    min-height: clamp(340px, 58dvh, 560px);
+    padding: 14px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .container {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .topBar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .targetValue {
+    font-size: 1.35rem;
+  }
+
+  .badge {
+    padding-block: 5px;
+    font-size: 0.82rem;
+  }
+
+  .board {
+    min-height: 280px;
+    padding: 12px;
+  }
+
+  .grid {
+    width: min(100%, 112vh, 560px);
+    max-height: 100%;
+  }
+}

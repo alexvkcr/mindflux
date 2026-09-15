@@ -7,6 +7,7 @@ import { FixedReading } from "../games/speed-reading/FixedReading";
 import { ColumnReading } from "../games/speed-reading/ColumnReading/ColumnReading";
 import { ReadingControls } from "../games/speed-reading/components/ReadingControls";
 import { DobleNumero } from "../games/campo-visual/DobleNumero/DobleNumero";
+import { SchulteTable } from "../games/campo-visual/SchulteTable/SchulteTable";
 import { ReflejoRapido } from "../games/reaction/ReflejoRapido";
 import { CalculoRapido } from "../games/reaction/CalculoRapido";
 import { ConcordanciaGramatical } from "../games/reaction/ConcordanciaGramatical";
@@ -273,7 +274,7 @@ export function GameCanvas({
 
   const isColumnReadingGame = controls.category === "speedReading" && controls.game === "columnReading";
   const shouldGrowWithContent =
-    (controls.category === "visualField" && controls.game === "doubleNumber") ||
+    controls.category === "visualField" ||
     controls.category === "math" ||
     controls.category === "reactionTime";
   const boardClassName = [
@@ -343,6 +344,15 @@ export function GameCanvas({
         {controls.category === "visualField" && controls.game === "doubleNumber" && (
           <DobleNumero
             level={controls.level}
+            running={controls.running}
+            boardW={boardW}
+            boardH={boardH}
+            onTimeout={handleTimeout}
+          />
+        )}
+
+        {controls.category === "visualField" && controls.game === "schulteTable" && (
+          <SchulteTable
             running={controls.running}
             boardW={boardW}
             boardH={boardH}

@@ -13,6 +13,7 @@ export type GameKey =
   | "fixedReading"
   | "columnReading"
   | "doubleNumber"
+  | "schulteTable"
   | "quickReflex"
   | "quickMath"
   | "grammarMatch"
@@ -35,7 +36,7 @@ export type ControlsState = {
 const CATEGORY_GAMES: Record<CategoryKey, GameKey[]> = {
   eyeMovement: ["basic", "isoDistance", "isoRhythm"],
   speedReading: ["fixedReading", "columnReading"],
-  visualField: ["doubleNumber"],
+  visualField: ["doubleNumber", "schulteTable"],
   reactionTime: ["quickReflex", "quickMath", "grammarMatch"],
   math: ["mathChain", "mentalCount", "hiLoCount"],
   miniLessons: ["triggerDrill"]
@@ -90,7 +91,7 @@ export function ControlsBar(props: {
   const isIsoRhythm = effectiveGame === "isoRhythm";
   const usesDistanceSelector = isIsoDistance || isIsoRhythm;
   const isColumnReading = isSpeedReading && effectiveGame === "columnReading";
-  const isDoubleNumber = state.category === "visualField" && effectiveGame === "doubleNumber";
+  const isVisualFieldCategory = state.category === "visualField";
   const isReactionCategory = state.category === "reactionTime";
   const isMathCategory = state.category === "math";
   const isMiniLessonCategory = state.category === "miniLessons";
@@ -164,7 +165,7 @@ export function ControlsBar(props: {
         </div>
       )}
 
-      {!isColumnReading && !isDoubleNumber && !isReactionCategory && !isMathCategory && !isMiniLessonCategory && (
+      {!isColumnReading && !isVisualFieldCategory && !isReactionCategory && !isMathCategory && !isMiniLessonCategory && (
         <div className={styles.level}>
           <label className={styles.label}>
             {t.controls.levelLabel}: {normalizedLevel}
