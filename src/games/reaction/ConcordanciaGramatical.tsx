@@ -188,24 +188,32 @@ export function ConcordanciaGramatical({ running, onTimeout }: ConcordanciaGrama
     return () => registerControlsPortal(null);
   }, [distanceLevel, registerControlsPortal, running, visibilityLevel]);
 
+  const handleAnswer = useCallback((pressedMatch: boolean) => {
+    if (!awaitingResponse || explanationOpen || phase !== "stimulus" || !pair) {
+      return;
+    }
+
+    const matches = pair.articleCategory === pair.nounCategory;
+    const success = (pressedMatch && matches) || (!pressedMatch && !matches);
+    registerResponse({
+      success,
+      label: success ? "Correcto" : "Incorrecto",
+      timeMsOverride: success ? undefined : 2000
+    });
+  }, [awaitingResponse, explanationOpen, pair, phase, registerResponse]);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code !== "KeyZ" && event.code !== "KeyX") {
         return;
       }
-      if (!awaitingResponse || explanationOpen || phase !== "stimulus" || !pair) {
-        return;
-      }
       event.preventDefault();
-      const matches = pair.articleCategory === pair.nounCategory;
-      const pressedMatch = event.code === "KeyZ";
-      const success = (pressedMatch && matches) || (!pressedMatch && !matches);
-      registerResponse({ success, label: success ? "Correcto" : "Incorrecto", timeMsOverride: success ? undefined : 2000 });
+      handleAnswer(event.code === "KeyZ");
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [awaitingResponse, explanationOpen, pair, phase, registerResponse]);
+  }, [handleAnswer]);
 
   const spacing = useMemo(() => mapDistanceToGap(distanceLevel), [distanceLevel]);
 
@@ -253,6 +261,27 @@ export function ConcordanciaGramatical({ running, onTimeout }: ConcordanciaGrama
           <p className={styles.helperText}>Las palabras ya no son visibles, responde Z/X antes de 2000 ms.</p>
         )}
         {phase !== "stimulus" && <p className={styles.helperText}>Esperando las palabras...</p>}
+      </div>
+
+      <div className={concordStyles.answerRow}>
+        <button
+          type="button"
+          className={`${concordStyles.answerButton} ${concordStyles.answerButtonPrimary}`}
+          onClick={() => handleAnswer(true)}
+          disabled={!awaitingResponse || explanationOpen || phase !== "stimulus" || !pair}
+        >
+          Z<br />
+          <span>concuerda</span>
+        </button>
+        <button
+          type="button"
+          className={`${concordStyles.answerButton} ${concordStyles.answerButtonSecondary}`}
+          onClick={() => handleAnswer(false)}
+          disabled={!awaitingResponse || explanationOpen || phase !== "stimulus" || !pair}
+        >
+          X<br />
+          <span>no concuerda</span>
+        </button>
       </div>
 
       {summary && (
