@@ -1,15 +1,13 @@
-export type MiniLessonId = string | number;
-
-export type MiniLesson = {
+export interface MiniLesson {
   id: string;
   number: number;
   title: string;
-  prompt: string;
+  prompt?: string;
   core?: string;
   rule?: string;
   trigger?: string;
-  examples?: string[];
   note?: string;
+  examples?: string[] | string;
   tags?: string[];
-  intensity?: 1 | 2 | 3 | 4 | 5;
-};
+  intensity?: number;
+}
