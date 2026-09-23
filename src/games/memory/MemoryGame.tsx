@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { PrimaryButton } from "../../components/ui/PrimaryButton";
-import { useRegisterControlsPortal } from "../../contexts/ControlsPortalContext";
+import { useRegisterControlsPortal } from "../../contexts/controlsPortal";
 import { useMemoryGame } from "./useMemoryGame";
 import { compareAnswer, formatExposure, groupSequence, normalizeExposure, stepExposure, type MemoryMode } from "./utils";
 import styles from "./MemoryGame.module.scss";

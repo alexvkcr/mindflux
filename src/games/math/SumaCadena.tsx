@@ -3,7 +3,7 @@ import styles from "./MathGame.module.scss";
 import controlStyles from "../reaction/ReactionControls.module.scss";
 import { PrimaryButton } from "../../components/ui/PrimaryButton";
 import { Modal } from "../../components/ui/Modal";
-import { useRegisterControlsPortal } from "../../contexts/ControlsPortalContext";
+import { useRegisterControlsPortal } from "../../contexts/controlsPortal";
 import { START_COUNTDOWN_SECONDS, levelToCount, levelToIntervalMs } from "./utils";
 import { MathProgressBar } from "./components/MathProgressBar";
 

@@ -5,7 +5,7 @@ import { CvControls } from "./components/CvControls";
 import { useDoubleNumberEngine, type ModeVariant } from "./hooks/useDoubleNumberEngine";
 import { clampSpeedLevel, clampIntervalLevel, DEFAULT_ROUND_DURATION_SECONDS, type RoundDurationSeconds } from "./constants";
 import { formatCountdown } from "../../speed-reading/utils/formatCountdown";
-import { useRegisterControlsPortal } from "../../../contexts/ControlsPortalContext";
+import { useRegisterControlsPortal } from "../../../contexts/controlsPortal";
 
 interface Props {
   level: number;

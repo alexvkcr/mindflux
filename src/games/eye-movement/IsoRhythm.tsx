@@ -3,7 +3,7 @@ import styles from "./Basic.module.scss";
 import controlStyles from "../reaction/ReactionControls.module.scss";
 import isoStyles from "./IsoRhythm.module.scss";
 import { getIntervalMs } from "../utils/speed";
-import { useRegisterControlsPortal } from "../../contexts/ControlsPortalContext";
+import { useRegisterControlsPortal } from "../../contexts/controlsPortal";
 import { t } from "../../i18n";
 
 type Props = {

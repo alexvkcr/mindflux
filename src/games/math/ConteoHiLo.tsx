@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./MathGame.module.scss";
 import controlStyles from "../reaction/ReactionControls.module.scss";
 import { BETWEEN_BLOCK_COUNTDOWN_SECONDS, BLOCK_SIZE_OPTIONS, START_COUNTDOWN_SECONDS, levelToIntervalMs } from "./utils";
-import { useRegisterControlsPortal } from "../../contexts/ControlsPortalContext";
+import { useRegisterControlsPortal } from "../../contexts/controlsPortal";
 import { MathProgressBar } from "./components/MathProgressBar";
 import { Modal } from "../../components/ui/Modal";
 

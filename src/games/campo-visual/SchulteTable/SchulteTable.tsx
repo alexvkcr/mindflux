@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
 import { Modal } from "../../../components/ui/Modal";
-import { useRegisterControlsPortal } from "../../../contexts/ControlsPortalContext";
+import { useRegisterControlsPortal } from "../../../contexts/controlsPortal";
 import controlStyles from "../../reaction/ReactionControls.module.scss";
 import styles from "./SchulteTable.module.scss";
 

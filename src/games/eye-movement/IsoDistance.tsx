@@ -175,11 +175,12 @@ export function EyeMovementIsoDistance({
   }, [bounds, defaultCenter]);
 
   useEffect(() => {
+    const loop = loopRef.current;
     runningRef.current = running;
 
-    if (loopRef.current.killer) {
-      clearTimeout(loopRef.current.killer);
-      loopRef.current.killer = null;
+    if (loop.killer) {
+      clearTimeout(loop.killer);
+      loop.killer = null;
     }
 
     if (!running) {
@@ -191,7 +192,7 @@ export function EyeMovementIsoDistance({
     moveStep(origin);
     startLoop();
 
-    loopRef.current.killer = setTimeout(() => {
+    loop.killer = setTimeout(() => {
       runningRef.current = false;
       stopLoop();
       onTimeout();
@@ -199,9 +200,9 @@ export function EyeMovementIsoDistance({
 
     return () => {
       stopLoop();
-      if (loopRef.current.killer) {
-        clearTimeout(loopRef.current.killer);
-        loopRef.current.killer = null;
+      if (loop.killer) {
+        clearTimeout(loop.killer);
+        loop.killer = null;
       }
     };
   }, [moveStep, onTimeout, randomizeStart, running, startLoop, stopLoop]);
@@ -221,11 +222,12 @@ export function EyeMovementIsoDistance({
   }, [startLoop, stopLoop]);
 
   useEffect(() => {
+    const loop = loopRef.current;
     return () => {
       stopLoop();
-      if (loopRef.current.killer) {
-        clearTimeout(loopRef.current.killer);
-        loopRef.current.killer = null;
+      if (loop.killer) {
+        clearTimeout(loop.killer);
+        loop.killer = null;
       }
     };
   }, [stopLoop]);

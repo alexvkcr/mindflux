@@ -2,7 +2,7 @@ import type { ChangeEvent } from "react";
 import { t } from "../i18n";
 import styles from "./ControlsBar.module.scss";
 import { PrimaryButton } from "./ui/PrimaryButton";
-import { useControlsPortalNode } from "../contexts/ControlsPortalContext";
+import { useControlsPortalNode } from "../contexts/controlsPortal";
 import { EYE_MOVEMENT_MAX_LEVEL } from "../games/utils/speed";
 
 export type CategoryKey = "eyeMovement" | "speedReading" | "visualField" | "reactionTime" | "math" | "memory";

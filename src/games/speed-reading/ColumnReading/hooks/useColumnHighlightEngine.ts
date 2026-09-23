@@ -15,7 +15,7 @@ export interface EngineParams {
   onTimeout: () => void;
 }
 
-interface AdjustableParams extends Pick<EngineParams, "text" | "charWidth" | "wpm" | "rows"> {}
+type AdjustableParams = Pick<EngineParams, "text" | "charWidth" | "wpm" | "rows">;
 
 export interface EngineState {
   grid: string[];

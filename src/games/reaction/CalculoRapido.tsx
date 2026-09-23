@@ -5,7 +5,7 @@ import { usePausableTimeout } from "./hooks/usePausableTimeout";
 import styles from "./ReactionGame.module.scss";
 import calcStyles from "./CalculoRapido.module.scss";
 import { Modal } from "../../components/ui/Modal";
-import { useRegisterControlsPortal } from "../../contexts/ControlsPortalContext";
+import { useRegisterControlsPortal } from "../../contexts/controlsPortal";
 import controlStyles from "./ReactionControls.module.scss";
 
 interface CalculoRapidoProps {
