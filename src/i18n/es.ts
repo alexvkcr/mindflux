@@ -15,7 +15,8 @@
       speedReading: "Lectura Rapida",
       visualField: "Campo Visual",
       reactionTime: "Tiempo de reaccion",
-      math: "Juegos matematicos"
+      math: "Juegos matematicos",
+      memory: "Memoria"
     },
     games: {
       basic: "Basico",
@@ -30,7 +31,8 @@
       grammarMatch: "Concordancia Gramatical",
       mathChain: "Suma en Cadena",
       mentalCount: "Cuenta Mental 1-0-(-1)",
-      hiLoCount: "Conteo de Cartas Hi-Lo"
+      hiLoCount: "Conteo de Cartas Hi-Lo",
+      digitMemory: "Memoria de d\u00edgitos"
     },
     bookLabel: "Texto",
     books: {

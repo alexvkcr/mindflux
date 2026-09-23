@@ -14,6 +14,7 @@ import { ConcordanciaGramatical } from "../games/reaction/ConcordanciaGramatical
 import { SumaCadena } from "../games/math/SumaCadena";
 import { CuentaMental } from "../games/math/CuentaMental";
 import { ConteoHiLo } from "../games/math/ConteoHiLo";
+import { MemoryGame } from "../games/memory/MemoryGame";
 import { useColumnHighlightEngine } from "../games/speed-reading/ColumnReading/hooks/useColumnHighlightEngine";
 import { levelToWpm } from "../games/speed-reading/utils/wpm";
 import { texts } from "../games/speed-reading/texts";
@@ -275,7 +276,8 @@ export function GameCanvas({
   const shouldGrowWithContent =
     controls.category === "visualField" ||
     controls.category === "math" ||
-    controls.category === "reactionTime";
+    controls.category === "reactionTime" ||
+    controls.category === "memory";
   const boardClassName = [
     styles.board,
     isColumnReadingGame ? styles.noFrame : "",
@@ -287,7 +289,9 @@ export function GameCanvas({
 
   const boardStyle: CSSProperties = { width: boardW };
   if (shouldGrowWithContent) {
-    boardStyle.minHeight = boardH;
+    if (controls.category !== "memory") {
+      boardStyle.minHeight = boardH;
+    }
   } else {
     boardStyle.height = boardH;
   }
@@ -381,6 +385,10 @@ export function GameCanvas({
 
         {controls.category === "reactionTime" && controls.game === "grammarMatch" && (
           <ConcordanciaGramatical running={controls.running} boardW={boardW} boardH={boardH} onTimeout={handleTimeout} />
+        )}
+
+        {controls.category === "memory" && controls.game === "digitMemory" && (
+          <MemoryGame />
         )}
       </div>
     </section>
