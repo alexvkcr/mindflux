@@ -111,7 +111,7 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
   const [barKey, setBarKey] = useState(0);
   const [cooldown, setCooldown] = useState(0);
   const [explanationOpen, setExplanationOpen] = useState(false);
-  const [distortions, setDistortions] = useState<DistortionOptions>({ size: false, rotation: false, perspective: false });
+  const [distortions, setDistortions] = useState<DistortionOptions>({ size: "normal", rotation: "normal", perspective: "none" });
   const [cardDistortion, setCardDistortion] = useState<CardDistortion>(NO_DISTORTION);
 
   const countRef = useRef(0);
@@ -303,20 +303,43 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
         {useCardImages && (
           <fieldset className={styles.distortionControls} disabled={controlsDisabled}>
             <legend>Distorsiones (combinables)</legend>
-            {([
-              ["size", "Tamaño aleatorio (50–100%)"],
-              ["rotation", "Rotación aleatoria (hasta 180°)"],
-              ["perspective", "Perspectiva aleatoria (hasta 80%)"]
-            ] as const).map(([key, label]) => (
-              <label key={key}>
-                <input type="checkbox" checked={distortions[key]}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setDistortions((previous) => ({ ...previous, [key]: checked }));
-                  }} />
-                {label}
-              </label>
-            ))}
+            <label>
+              Tamaño
+              <select value={distortions.size} onChange={(e) => {
+                const size = e.target.value as DistortionOptions["size"];
+                setDistortions((previous) => ({ ...previous, size }));
+              }}>
+                <option value="normal">Normal</option>
+                <option value="half">50%</option>
+                <option value="random">Aleatorio (50–100%)</option>
+              </select>
+            </label>
+            <label>
+              Rotación
+              <select value={distortions.rotation} onChange={(e) => {
+                const rotation = e.target.value as DistortionOptions["rotation"];
+                setDistortions((previous) => ({ ...previous, rotation }));
+              }}>
+                <option value="normal">Normal</option>
+                <option value="horizontal">Horizontal (90°)</option>
+                <option value="upsideDown">Boca abajo (180°)</option>
+                <option value="horizontalOrUpsideDown">Horizontal / boca abajo</option>
+                <option value="random">Aleatoria (hasta 180°)</option>
+              </select>
+            </label>
+            <label>
+              Perspectiva
+              <select value={distortions.perspective} onChange={(e) => {
+                const perspective = e.target.value as DistortionOptions["perspective"];
+                setDistortions((previous) => ({ ...previous, perspective }));
+              }}>
+                <option value="none">Sin perspectiva</option>
+                <option value="horizontal">Horizontal (80%)</option>
+                <option value="vertical">Vertical (80%)</option>
+                <option value="both">Ambos ejes (80%)</option>
+                <option value="random">Aleatoria (hasta 80%)</option>
+              </select>
+            </label>
           </fieldset>
         )}
       </div>
@@ -437,7 +460,10 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
           <li>Cada carta aporta +1 (2-6), 0 (7-9) o -1 (10, figuras y As). Lleva la cuenta mentalmente.</li>
           <li>Cada bloque solicitara tu conteo. Usa los botones para continuar o terminar.</li>
           <li>Puedes ajustar el numero de mazos, el tamano del bloque y la velocidad antes de iniciar.</li>
-          {useCardImages && <li>Puedes combinar tamaño, rotación y perspectiva aleatorios, incluso las tres opciones a la vez. Cada carta mantiene su distorsión hasta que aparece la siguiente.</li>}
+          {useCardImages && <>
+            <li>Puedes combinar los modos de tamaño, rotación y perspectiva. Los modos fijos se aplican a todas las cartas; los aleatorios cambian con cada carta.</li>
+            <li>Horizontal / boca abajo elige entre 90°, 180° y 270°. La perspectiva en ambos ejes reparte la distorsión entre X e Y, con un máximo total del 80%.</li>
+          </>}
         </ul>
       </Modal>
     </div>

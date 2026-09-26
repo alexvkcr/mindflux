@@ -85,9 +85,9 @@
   border-radius: 8px;
   font-size: 0.85rem;
 
-  label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-  input { accent-color: #5ce69b; }
-  input:focus-visible { outline: 2px solid #5ce69b; outline-offset: 3px; }
+  label { display: flex; flex: 1 1 180px; min-width: 0; flex-direction: column; gap: 6px; }
+  select { width: 100%; min-width: 0; }
+  select:focus-visible { outline: 2px solid #5ce69b; outline-offset: 3px; }
   &:disabled { opacity: 0.6; }
   &:disabled label { cursor: default; }
 }

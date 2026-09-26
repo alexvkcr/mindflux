@@ -1,7 +1,7 @@
 export interface DistortionOptions {
-  size: boolean;
-  rotation: boolean;
-  perspective: boolean;
+  size: "normal" | "half" | "random";
+  rotation: "normal" | "horizontal" | "upsideDown" | "horizontalOrUpsideDown" | "random";
+  perspective: "none" | "horizontal" | "vertical" | "both" | "random";
 }
 
 export interface CardDistortion {
@@ -18,14 +18,19 @@ export const NO_DISTORTION: CardDistortion = {
 export function randomCardDistortion(options: DistortionOptions): CardDistortion {
   // (1 - limit) / (1 + limit) = 0.2: up to 80% perspective reduction.
   const limit = 2 / 3;
-  let p = options.perspective ? (Math.random() * 2 - 1) * limit : 0;
-  let q = options.perspective ? (Math.random() * 2 - 1) * limit : 0;
+  let p = options.perspective === "random" ? (Math.random() * 2 - 1) * limit
+    : options.perspective === "horizontal" ? limit : options.perspective === "both" ? limit / 2 : 0;
+  let q = options.perspective === "random" ? (Math.random() * 2 - 1) * limit
+    : options.perspective === "vertical" ? limit : options.perspective === "both" ? limit / 2 : 0;
   const bound = Math.max(1, (Math.abs(p) + Math.abs(q)) / limit);
   p /= bound;
   q /= bound;
   return {
-    scale: options.size ? 0.5 + Math.random() * 0.5 : 1,
-    angle: options.rotation ? Math.random() * 360 - 180 : 0,
+    scale: options.size === "random" ? 0.5 + Math.random() * 0.5 : options.size === "half" ? 0.5 : 1,
+    angle: options.rotation === "random" ? Math.random() * 360 - 180
+      : options.rotation === "horizontal" ? 90
+      : options.rotation === "upsideDown" ? 180
+      : options.rotation === "horizontalOrUpsideDown" ? [90, 180, -90][Math.floor(Math.random() * 3)] : 0,
     perspectiveX: p,
     perspectiveY: q
   };

@@ -2,18 +2,27 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { cardTransform, randomCardDistortion, NO_DISTORTION } from '../src/games/math/cardDistortions.ts';
 
-test('all eight option combinations respect their ranges and disabled effects', () => {
-  for (let mask = 0; mask < 8; mask++) {
-    const options = { size: !!(mask & 1), rotation: !!(mask & 2), perspective: !!(mask & 4) };
-    for (let i = 0; i < 100; i++) {
+test('all 75 mode combinations preserve fixed values and random bounds', () => {
+  for (const size of ['normal', 'half', 'random']) {
+    for (const rotation of ['normal', 'horizontal', 'upsideDown', 'horizontalOrUpsideDown', 'random']) {
+      for (const perspective of ['none', 'horizontal', 'vertical', 'both', 'random']) {
+        const options = { size, rotation, perspective };
+        for (let i = 0; i < 30; i++) {
       const d = randomCardDistortion(options);
       assert.ok(d.scale >= 0.5 && d.scale <= 1);
       assert.ok(Math.abs(d.angle) <= 180);
       assert.ok(Math.abs(d.perspectiveX) + Math.abs(d.perspectiveY) <= 2 / 3 + 1e-12);
-      if (!options.size) assert.equal(d.scale, 1);
-      if (!options.rotation) assert.equal(d.angle, 0);
-      if (!options.perspective) assert.equal(Math.abs(d.perspectiveX) + Math.abs(d.perspectiveY), 0);
-      if (!mask) assert.deepEqual(d, NO_DISTORTION);
+      if (size === 'normal') assert.equal(d.scale, 1);
+      if (size === 'half') assert.equal(d.scale, 0.5);
+      if (rotation === 'normal') assert.equal(d.angle, 0);
+      if (rotation === 'horizontal') assert.equal(d.angle, 90);
+      if (rotation === 'upsideDown') assert.equal(d.angle, 180);
+      if (rotation === 'horizontalOrUpsideDown') assert.ok([90, 180, -90].includes(d.angle));
+      const fixedPerspective = { none: [0, 0], horizontal: [2 / 3, 0], vertical: [0, 2 / 3], both: [1 / 3, 1 / 3] };
+      if (perspective !== 'random') assert.deepEqual([d.perspectiveX, d.perspectiveY], fixedPerspective[perspective]);
+      if (size === 'normal' && rotation === 'normal' && perspective === 'none') assert.deepEqual(d, NO_DISTORTION);
+        }
+      }
     }
   }
 });
