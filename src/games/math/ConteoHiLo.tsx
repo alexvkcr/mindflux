@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import styles from "./MathGame.module.scss";
 import controlStyles from "../reaction/ReactionControls.module.scss";
 import { BETWEEN_BLOCK_COUNTDOWN_SECONDS, BLOCK_SIZE_OPTIONS, START_COUNTDOWN_SECONDS, SPEED_LEVELS, levelToIntervalMs } from "./utils";
@@ -7,28 +8,40 @@ import { MathProgressBar } from "./components/MathProgressBar";
 import { Modal } from "../../components/ui/Modal";
 import { cardTransform, NO_DISTORTION, randomCardDistortion } from "./cardDistortions";
 import type { CardDistortion, DistortionOptions } from "./cardDistortions";
+import { closeCardBitmaps, loadCardBitmaps } from "./cardBitmaps";
 
-function PracticeCard({ card, distortion }: { card: string; distortion: CardDistortion }) {
+function PracticeCard({ card, distortion, bitmap, presentation }: { card: string; distortion: CardDistortion; bitmap: ImageBitmap; presentation: number }) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stage, setStage] = useState({ width: 0, height: 0 });
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = stageRef.current;
     if (!element) return;
+    const bounds = element.getBoundingClientRect();
+    setStage({ width: bounds.width, height: bounds.height });
     const observer = new ResizeObserver(([entry]) => {
       setStage({ width: entry.contentRect.width, height: entry.contentRect.height });
     });
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
+  useLayoutEffect(() => {
+    const context = canvasRef.current?.getContext("2d");
+    if (!context) return;
+    context.clearRect(0, 0, 500, 700);
+    context.drawImage(bitmap, 0, 0, 500, 700);
+  }, [bitmap, presentation]);
   const width = Math.max(1, Math.min(250, stage.width, stage.height / 1.4));
   const height = width * 1.4;
   return (
     <div ref={stageRef} className={styles.cardStage}>
-      <img
-        key={card}
+      <canvas
+        ref={canvasRef}
+        width={500}
+        height={700}
+        role="img"
+        aria-label={`Carta ${card}`}
         className={styles.realCardImage}
-        src={getCardImageSrc(card)}
-        alt={`Carta ${card}`}
         style={{
           width, height, marginLeft: -width / 2, marginTop: -height / 2,
           visibility: stage.width > 0 ? "visible" : "hidden",
@@ -46,7 +59,19 @@ interface MathGameProps {
   onTimeout: () => void;
 }
 
-type Phase = "idle" | "countdown" | "show" | "answer" | "cooldown" | "ended";
+type Phase = "idle" | "preparing" | "loadError" | "countdown" | "show" | "answer" | "cooldown" | "ended";
+
+interface PlannedCard {
+  card: string;
+  distortion: CardDistortion;
+}
+
+interface PreparedBlock {
+  cards: PlannedCard[];
+  controller: AbortController;
+  bitmaps: Map<string, ImageBitmap>;
+  ready: Promise<boolean>;
+}
 
 const SHOE_OPTIONS = [
   { label: "1 mazo", value: 1 },
@@ -96,7 +121,7 @@ interface ConteoHiLoProps extends MathGameProps {
 function getCardImageSrc(card: string): string {
   const rank = card.slice(0, card.length - 1);
   const suit = card.at(-1);
-  return `${import.meta.env.BASE_URL}assets/cards-real/${rank}-${SUIT_IMAGE_NAMES[suit ?? ""]}.png`;
+  return `${import.meta.env.BASE_URL}assets/cards-game/${rank}-${SUIT_IMAGE_NAMES[suit ?? ""]}.png`;
 }
 
 export function ConteoHiLo({ running, onTimeout, useCardImages = false }: ConteoHiLoProps) {
@@ -113,6 +138,9 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
   const [explanationOpen, setExplanationOpen] = useState(false);
   const [distortions, setDistortions] = useState<DistortionOptions>({ size: "normal", rotation: "normal", perspective: "none" });
   const [cardDistortion, setCardDistortion] = useState<CardDistortion>(NO_DISTORTION);
+  const [currentBitmap, setCurrentBitmap] = useState<ImageBitmap | null>(null);
+  const [loadProgress, setLoadProgress] = useState({ loaded: 0, total: 0 });
+  const [loadError, setLoadError] = useState(false);
 
   const countRef = useRef(0);
   const shoeRef = useRef<string[]>([]);
@@ -121,15 +149,29 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
   const timersRef = useRef<number[]>([]);
   const runningRef = useRef(false);
   const prevRunningRef = useRef(false);
+  const frameRef = useRef<number | null>(null);
+  const preparedRef = useRef<PreparedBlock | null>(null);
+  const countdownRequestRef = useRef<{ phase: "countdown" | "cooldown"; seconds: number }>({ phase: "countdown", seconds: START_COUNTDOWN_SECONDS });
 
   const registerControlsPortal = useRegisterControlsPortal();
 
   const intervalMs = useMemo(() => levelToIntervalMs(speedLevel), [speedLevel]);
-  const controlsDisabled = running || phase === "countdown" || phase === "show" || phase === "answer" || phase === "cooldown";
+  const controlsDisabled = running || !["idle", "ended"].includes(phase);
 
   const clearTimers = useCallback(() => {
     timersRef.current.forEach((id) => window.clearTimeout(id));
     timersRef.current = [];
+    if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
+    frameRef.current = null;
+  }, []);
+
+  const releaseBlock = useCallback(() => {
+    const prepared = preparedRef.current;
+    preparedRef.current = null;
+    if (prepared) {
+      prepared.controller.abort();
+      closeCardBitmaps(prepared.bitmaps);
+    }
   }, []);
 
   const buildShoe = useCallback(() => {
@@ -147,14 +189,17 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
 
   const resetState = useCallback(() => {
     clearTimers();
+    releaseBlock();
     setPhase("idle");
     setCurrentCard(null);
+    setCurrentBitmap(null);
+    setLoadError(false);
     setValuesShown(0);
     setInputValue("");
     setFeedback("");
     setCooldown(0);
     blockIndexRef.current = 0;
-  }, [clearTimers]);
+  }, [clearTimers, releaseBlock]);
 
   const drawCard = useCallback(() => {
     if (!shoeRef.current.length) {
@@ -168,6 +213,36 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
     shoeIndexRef.current += 1;
     return card;
   }, [buildShoe]);
+
+  const prepareBlock = useCallback((cards?: PlannedCard[]) => {
+    releaseBlock();
+    setLoadError(false);
+    const block: PreparedBlock = {
+      cards: cards ?? Array.from({ length: blockSize }, () => ({
+        card: drawCard(), distortion: randomCardDistortion(distortions)
+      })),
+      controller: new AbortController(),
+      bitmaps: new Map(),
+      ready: Promise.resolve(false)
+    };
+    preparedRef.current = block;
+    block.ready = loadCardBitmaps(block.cards.map(({ card }) => card), getCardImageSrc, block.controller.signal,
+      (loaded, total) => {
+        if (preparedRef.current === block) setLoadProgress({ loaded, total });
+      }
+    ).then((bitmaps) => {
+      if (preparedRef.current !== block || block.controller.signal.aborted) {
+        closeCardBitmaps(bitmaps);
+        return false;
+      }
+      block.bitmaps = bitmaps;
+      return true;
+    }).catch(() => {
+      if (preparedRef.current === block && !block.controller.signal.aborted) setLoadError(true);
+      return false;
+    });
+    return block;
+  }, [blockSize, distortions, drawCard, releaseBlock]);
 
   const scheduleTimeout = useCallback((fn: () => void, delay: number) => {
     const id = window.setTimeout(fn, delay);
@@ -189,28 +264,54 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
       if (blockIndexRef.current >= blockSize) {
         setPhase("answer");
         setCurrentCard(null);
+        setCurrentBitmap(null);
+        if (useCardImages) prepareBlock();
         return;
       }
-      const card = drawCard();
-      const rank = card.slice(0, card.length - 1);
-      const value = getCardValue(rank);
-      countRef.current += value;
-      blockIndexRef.current += 1;
-      setValuesShown(blockIndexRef.current);
-      setCurrentCard(card);
-      setCardDistortion(useCardImages ? randomCardDistortion(distortions) : NO_DISTORTION);
-      setBarKey((prev) => prev + 1);
-      scheduleTimeout(playNext, intervalMs);
+      const present = () => {
+        frameRef.current = null;
+        if (!runningRef.current) return;
+        const block = preparedRef.current;
+        const planned = useCardImages ? block?.cards[blockIndexRef.current] : undefined;
+        const card = planned?.card ?? drawCard();
+        const update = () => {
+          countRef.current += getCardValue(card.slice(0, -1));
+          blockIndexRef.current += 1;
+          setValuesShown(blockIndexRef.current);
+          setCurrentCard(card);
+          setCurrentBitmap(block?.bitmaps.get(card) ?? null);
+          setCardDistortion(planned?.distortion ?? NO_DISTORTION);
+          setBarKey((prev) => prev + 1);
+        };
+        // Commit the canvas, transform, counter and progress before this frame paints.
+        if (useCardImages) flushSync(update);
+        else update();
+        scheduleTimeout(playNext, intervalMs);
+      };
+      if (useCardImages) frameRef.current = window.requestAnimationFrame(present);
+      else present();
     };
 
     playNext();
-  }, [blockSize, clearTimers, drawCard, intervalMs, scheduleTimeout, distortions, useCardImages]);
+  }, [blockSize, clearTimers, drawCard, intervalMs, scheduleTimeout, prepareBlock, useCardImages]);
 
   const startBlockAfterCountdown = useCallback(
-    (nextPhase: "countdown" | "cooldown", seconds: number) => {
+    async (nextPhase: "countdown" | "cooldown", seconds: number) => {
       clearTimers();
-      setPhase(nextPhase);
+      countdownRequestRef.current = { phase: nextPhase, seconds };
       setCurrentCard(null);
+      setCurrentBitmap(null);
+      if (useCardImages) {
+        setPhase("preparing");
+        const block = preparedRef.current ?? prepareBlock();
+        const ready = await block.ready;
+        if (!runningRef.current || preparedRef.current !== block) return;
+        if (!ready) {
+          setPhase("loadError");
+          return;
+        }
+      }
+      setPhase(nextPhase);
       setCooldown(seconds);
 
       let remaining = seconds;
@@ -230,10 +331,11 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
 
       scheduleTimeout(tick, 1000);
     },
-    [clearTimers, scheduleTimeout, startBlock]
+    [clearTimers, scheduleTimeout, startBlock, prepareBlock, useCardImages]
   );
 
   const startGame = useCallback(() => {
+    releaseBlock();
     countRef.current = 0;
     buildShoe();
     setFeedback("");
@@ -241,14 +343,16 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
     setValuesShown(0);
     blockIndexRef.current = 0;
     startBlockAfterCountdown("countdown", START_COUNTDOWN_SECONDS);
-  }, [buildShoe, startBlockAfterCountdown]);
+  }, [buildShoe, startBlockAfterCountdown, releaseBlock]);
 
   const finishGame = useCallback(() => {
     clearTimers();
+    releaseBlock();
     setPhase("ended");
     setCurrentCard(null);
+    setCurrentBitmap(null);
     onTimeout();
-  }, [clearTimers, onTimeout]);
+  }, [clearTimers, onTimeout, releaseBlock]);
 
   useEffect(() => {
     runningRef.current = running;
@@ -350,8 +454,17 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
 
   useEffect(() => () => {
     clearTimers();
+    releaseBlock();
     registerControlsPortal(null);
-  }, [clearTimers, registerControlsPortal]);
+  }, [clearTimers, registerControlsPortal, releaseBlock]);
+
+  const retryPreparation = () => {
+    prepareBlock(preparedRef.current?.cards);
+    if (phase === "loadError") {
+      const request = countdownRequestRef.current;
+      void startBlockAfterCountdown(request.phase, request.seconds);
+    }
+  };
 
   const handleGiveUp = () => {
     setFeedback(`La cuenta correcta era ${countRef.current}.`);
@@ -409,6 +522,18 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
       <div className={styles.board}>
         {phase === "idle" && <p className={styles.helperText}>Pulsa "Arranque" para comenzar el conteo.</p>}
 
+        {phase === "preparing" && (
+          <p className={styles.helperText} role="status">
+            {`Preparando cartas… ${loadProgress.loaded}/${loadProgress.total}`}
+          </p>
+        )}
+        {phase === "loadError" && (
+          <div className={styles.inputRow} role="alert">
+            <p className={styles.helperText}>No se pudieron preparar las cartas. Comprueba la conexión y reintenta.</p>
+            <button type="button" onClick={retryPreparation}>Reintentar</button>
+          </div>
+        )}
+
         {phase === "countdown" && (
           <div className={styles.countdownPanel} aria-live="polite">
             <p className={styles.cooldown}>Comenzando en</p>
@@ -419,10 +544,10 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
         {phase === "show" && (
           <div>
             <div className={styles.cardDisplay} aria-live="polite">
-              {useCardImages && currentCard ? (
-                <PracticeCard card={currentCard} distortion={cardDistortion} />
+              {useCardImages && currentCard && currentBitmap ? (
+                <PracticeCard card={currentCard} distortion={cardDistortion} bitmap={currentBitmap} presentation={barKey} />
               ) : (
-                currentCard
+                useCardImages ? null : currentCard
               )}
             </div>
             <p className={styles.countInfo}>
@@ -434,6 +559,16 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
 
         {phase === "answer" && (
           <div className={styles.inputRow}>
+            {useCardImages && (loadError ? (
+              <div role="alert">
+                <p className={styles.helperText}>No se pudo preparar el siguiente bloque.</p>
+                <button type="button" onClick={retryPreparation}>Reintentar</button>
+              </div>
+            ) : (
+              <p className={styles.helperText} role="status">
+                {loadProgress.loaded === loadProgress.total ? "Siguiente bloque listo" : `Preparando cartas… ${loadProgress.loaded}/${loadProgress.total}`}
+              </p>
+            ))}
             <input
               type="number"
               inputMode="numeric"
@@ -461,6 +596,7 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
           <li>Cada bloque solicitara tu conteo. Usa los botones para continuar o terminar.</li>
           <li>Puedes ajustar el numero de mazos, el tamano del bloque y la velocidad antes de iniciar.</li>
           {useCardImages && <>
+            <li>Las cartas se preparan antes de la cuenta atrás para evitar esperas de carga durante el bloque.</li>
             <li>Puedes combinar los modos de tamaño, rotación y perspectiva. Los modos fijos se aplican a todas las cartas; los aleatorios cambian con cada carta.</li>
             <li>Horizontal / boca abajo elige entre 90°, 180° y 270°. La perspectiva en ambos ejes reparte la distorsión entre X e Y, con un máximo total del 80%.</li>
           </>}
