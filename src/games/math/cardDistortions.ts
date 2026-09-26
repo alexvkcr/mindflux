@@ -16,9 +16,11 @@ export const NO_DISTORTION: CardDistortion = {
 };
 
 export function randomCardDistortion(options: DistortionOptions): CardDistortion {
-  let p = options.perspective ? (Math.random() * 2 - 1) / 3 : 0;
-  let q = options.perspective ? (Math.random() * 2 - 1) / 3 : 0;
-  const bound = Math.max(1, 3 * (Math.abs(p) + Math.abs(q)));
+  // (1 - limit) / (1 + limit) = 0.2: up to 80% perspective reduction.
+  const limit = 2 / 3;
+  let p = options.perspective ? (Math.random() * 2 - 1) * limit : 0;
+  let q = options.perspective ? (Math.random() * 2 - 1) * limit : 0;
+  const bound = Math.max(1, (Math.abs(p) + Math.abs(q)) / limit);
   p /= bound;
   q /= bound;
   return {

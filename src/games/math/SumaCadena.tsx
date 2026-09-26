@@ -4,7 +4,7 @@ import controlStyles from "../reaction/ReactionControls.module.scss";
 import { PrimaryButton } from "../../components/ui/PrimaryButton";
 import { Modal } from "../../components/ui/Modal";
 import { useRegisterControlsPortal } from "../../contexts/controlsPortal";
-import { START_COUNTDOWN_SECONDS, levelToCount, levelToIntervalMs } from "./utils";
+import { START_COUNTDOWN_SECONDS, SPEED_LEVELS, levelToCount, levelToIntervalMs } from "./utils";
 import { MathProgressBar } from "./components/MathProgressBar";
 
 interface MathGameProps {
@@ -147,7 +147,7 @@ export function SumaCadena({ running, onTimeout }: MathGameProps) {
         <label className={controlStyles.control}>
           <span className={controlStyles.label}>Velocidad (ms): {intervalMs} ms</span>
           <select value={speedLevel} disabled={disableControls} onChange={(e) => setSpeedLevel(Number(e.target.value))}>
-            {Array.from({ length: 9 }, (_, idx) => idx + 1).map((level) => (
+            {SPEED_LEVELS.map((level) => (
               <option key={level} value={level}>
                 Nivel {level}
               </option>

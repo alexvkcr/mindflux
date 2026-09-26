@@ -9,7 +9,7 @@ test('all eight option combinations respect their ranges and disabled effects', 
       const d = randomCardDistortion(options);
       assert.ok(d.scale >= 0.5 && d.scale <= 1);
       assert.ok(Math.abs(d.angle) <= 180);
-      assert.ok(Math.abs(d.perspectiveX) + Math.abs(d.perspectiveY) <= 1 / 3 + 1e-12);
+      assert.ok(Math.abs(d.perspectiveX) + Math.abs(d.perspectiveY) <= 2 / 3 + 1e-12);
       if (!options.size) assert.equal(d.scale, 1);
       if (!options.rotation) assert.equal(d.angle, 0);
       if (!options.perspective) assert.equal(Math.abs(d.perspectiveX) + Math.abs(d.perspectiveY), 0);
@@ -23,7 +23,7 @@ test('CSS projection keeps extreme corners centered and inside desktop and mobil
     const width = Math.min(250, stageW, stageH / 1.4);
     const height = width * 1.4;
     for (const angle of [-180, -90, -45, 0, 45, 90, 180]) {
-      for (const [p, q] of [[0, 0], [1 / 3, 0], [0, -1 / 3], [1 / 6, 1 / 6], [-1 / 6, 1 / 6]]) {
+      for (const [p, q] of [[0, 0], [2 / 3, 0], [0, -2 / 3], [1 / 3, 1 / 3], [-1 / 3, 1 / 3]]) {
         for (const scale of [0.5, 1]) {
           const css = cardTransform({ scale, angle, perspectiveX: p, perspectiveY: q }, width, height, stageW, stageH);
           const match = css.match(/^translate\((.+)px, (.+)px\) scale\((.+)\) rotate\((.+)deg\) matrix3d\((.+)\)$/);

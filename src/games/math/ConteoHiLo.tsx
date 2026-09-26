@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./MathGame.module.scss";
 import controlStyles from "../reaction/ReactionControls.module.scss";
-import { BETWEEN_BLOCK_COUNTDOWN_SECONDS, BLOCK_SIZE_OPTIONS, START_COUNTDOWN_SECONDS, levelToIntervalMs } from "./utils";
+import { BETWEEN_BLOCK_COUNTDOWN_SECONDS, BLOCK_SIZE_OPTIONS, START_COUNTDOWN_SECONDS, SPEED_LEVELS, levelToIntervalMs } from "./utils";
 import { useRegisterControlsPortal } from "../../contexts/controlsPortal";
 import { MathProgressBar } from "./components/MathProgressBar";
 import { Modal } from "../../components/ui/Modal";
@@ -25,6 +25,7 @@ function PracticeCard({ card, distortion }: { card: string; distortion: CardDist
   return (
     <div ref={stageRef} className={styles.cardStage}>
       <img
+        key={card}
         className={styles.realCardImage}
         src={getCardImageSrc(card)}
         alt={`Carta ${card}`}
@@ -292,7 +293,7 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
         <label className={controlStyles.control}>
           <span className={controlStyles.label}>Velocidad (ms): {intervalMs}</span>
           <select value={speedLevel} disabled={controlsDisabled} onChange={(e) => setSpeedLevel(Number(e.target.value))}>
-            {Array.from({ length: 9 }, (_, idx) => idx + 1).map((level) => (
+            {SPEED_LEVELS.map((level) => (
               <option key={level} value={level}>
                 Nivel {level}
               </option>
@@ -305,7 +306,7 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
             {([
               ["size", "Tamaño aleatorio (50–100%)"],
               ["rotation", "Rotación aleatoria (hasta 180°)"],
-              ["perspective", "Perspectiva aleatoria (hasta 50%)"]
+              ["perspective", "Perspectiva aleatoria (hasta 80%)"]
             ] as const).map(([key, label]) => (
               <label key={key}>
                 <input type="checkbox" checked={distortions[key]}
