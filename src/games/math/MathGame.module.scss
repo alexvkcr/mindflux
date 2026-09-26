@@ -67,6 +67,42 @@
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 }
 
+.cardStage {
+  position: relative;
+  width: 100%;
+  height: min(350px, 46dvh);
+}
+
+.distortionControls {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  font-size: 0.85rem;
+
+  label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  input { accent-color: #5ce69b; }
+  input:focus-visible { outline: 2px solid #5ce69b; outline-offset: 3px; }
+  &:disabled { opacity: 0.6; }
+  &:disabled label { cursor: default; }
+}
+
+.realCardImage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+  display: block;
+  font-size: 1rem;
+  line-height: 1.4;
+  object-fit: contain;
+}
+
 .inputRow {
   display: flex;
   flex-direction: column;

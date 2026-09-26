@@ -5,6 +5,38 @@ import { BETWEEN_BLOCK_COUNTDOWN_SECONDS, BLOCK_SIZE_OPTIONS, START_COUNTDOWN_SE
 import { useRegisterControlsPortal } from "../../contexts/controlsPortal";
 import { MathProgressBar } from "./components/MathProgressBar";
 import { Modal } from "../../components/ui/Modal";
+import { cardTransform, NO_DISTORTION, randomCardDistortion } from "./cardDistortions";
+import type { CardDistortion, DistortionOptions } from "./cardDistortions";
+
+function PracticeCard({ card, distortion }: { card: string; distortion: CardDistortion }) {
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [stage, setStage] = useState({ width: 0, height: 0 });
+  useEffect(() => {
+    const element = stageRef.current;
+    if (!element) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setStage({ width: entry.contentRect.width, height: entry.contentRect.height });
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  const width = Math.max(1, Math.min(250, stage.width, stage.height / 1.4));
+  const height = width * 1.4;
+  return (
+    <div ref={stageRef} className={styles.cardStage}>
+      <img
+        className={styles.realCardImage}
+        src={getCardImageSrc(card)}
+        alt={`Carta ${card}`}
+        style={{
+          width, height, marginLeft: -width / 2, marginTop: -height / 2,
+          visibility: stage.width > 0 ? "visible" : "hidden",
+          transform: cardTransform(distortion, width, height, stage.width, stage.height)
+        }}
+      />
+    </div>
+  );
+}
 
 interface MathGameProps {
   running: boolean;
@@ -30,6 +62,12 @@ const SHOE_OPTIONS = [
 
 const RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
 const SUITS = ["2660", "2665", "2666", "2663"].map((code) => String.fromCodePoint(parseInt(code, 16)));
+const SUIT_IMAGE_NAMES: Record<string, string> = {
+  "\u2660": "spades",
+  "\u2665": "hearts",
+  "\u2666": "diamonds",
+  "\u2663": "clubs"
+};
 
 function shuffle<T>(items: T[]): T[] {
   const arr = [...items];
@@ -50,7 +88,17 @@ function getCardValue(rank: string): number {
   return -1;
 }
 
-export function ConteoHiLo({ running, onTimeout }: MathGameProps) {
+interface ConteoHiLoProps extends MathGameProps {
+  useCardImages?: boolean;
+}
+
+function getCardImageSrc(card: string): string {
+  const rank = card.slice(0, card.length - 1);
+  const suit = card.at(-1);
+  return `${import.meta.env.BASE_URL}assets/cards-real/${rank}-${SUIT_IMAGE_NAMES[suit ?? ""]}.png`;
+}
+
+export function ConteoHiLo({ running, onTimeout, useCardImages = false }: ConteoHiLoProps) {
   const [shoeSize, setShoeSize] = useState(SHOE_OPTIONS[0].value);
   const [blockSize, setBlockSize] = useState(BLOCK_SIZE_OPTIONS[1]);
   const [speedLevel, setSpeedLevel] = useState(5);
@@ -62,6 +110,8 @@ export function ConteoHiLo({ running, onTimeout }: MathGameProps) {
   const [barKey, setBarKey] = useState(0);
   const [cooldown, setCooldown] = useState(0);
   const [explanationOpen, setExplanationOpen] = useState(false);
+  const [distortions, setDistortions] = useState<DistortionOptions>({ size: false, rotation: false, perspective: false });
+  const [cardDistortion, setCardDistortion] = useState<CardDistortion>(NO_DISTORTION);
 
   const countRef = useRef(0);
   const shoeRef = useRef<string[]>([]);
@@ -147,12 +197,13 @@ export function ConteoHiLo({ running, onTimeout }: MathGameProps) {
       blockIndexRef.current += 1;
       setValuesShown(blockIndexRef.current);
       setCurrentCard(card);
+      setCardDistortion(useCardImages ? randomCardDistortion(distortions) : NO_DISTORTION);
       setBarKey((prev) => prev + 1);
       scheduleTimeout(playNext, intervalMs);
     };
 
     playNext();
-  }, [blockSize, clearTimers, drawCard, intervalMs, scheduleTimeout]);
+  }, [blockSize, clearTimers, drawCard, intervalMs, scheduleTimeout, distortions, useCardImages]);
 
   const startBlockAfterCountdown = useCallback(
     (nextPhase: "countdown" | "cooldown", seconds: number) => {
@@ -248,11 +299,30 @@ export function ConteoHiLo({ running, onTimeout }: MathGameProps) {
             ))}
           </select>
         </label>
+        {useCardImages && (
+          <fieldset className={styles.distortionControls} disabled={controlsDisabled}>
+            <legend>Distorsiones (combinables)</legend>
+            {([
+              ["size", "Tamaño aleatorio (50–100%)"],
+              ["rotation", "Rotación aleatoria (hasta 180°)"],
+              ["perspective", "Perspectiva aleatoria (hasta 50%)"]
+            ] as const).map(([key, label]) => (
+              <label key={key}>
+                <input type="checkbox" checked={distortions[key]}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setDistortions((previous) => ({ ...previous, [key]: checked }));
+                  }} />
+                {label}
+              </label>
+            ))}
+          </fieldset>
+        )}
       </div>
     );
 
     return () => registerControlsPortal(null);
-  }, [blockSize, controlsDisabled, intervalMs, registerControlsPortal, shoeSize, speedLevel]);
+  }, [blockSize, controlsDisabled, intervalMs, registerControlsPortal, shoeSize, speedLevel, distortions, useCardImages]);
 
   useEffect(() => () => {
     clearTimers();
@@ -325,7 +395,11 @@ export function ConteoHiLo({ running, onTimeout }: MathGameProps) {
         {phase === "show" && (
           <div>
             <div className={styles.cardDisplay} aria-live="polite">
-              {currentCard}
+              {useCardImages && currentCard ? (
+                <PracticeCard card={currentCard} distortion={cardDistortion} />
+              ) : (
+                currentCard
+              )}
             </div>
             <p className={styles.countInfo}>
               Carta {valuesShown} / {blockSize}
@@ -356,14 +430,19 @@ export function ConteoHiLo({ running, onTimeout }: MathGameProps) {
         {feedback && <p className={styles.helperText}>{feedback}</p>}
       </div>
 
-      <Modal open={explanationOpen} title="Conteo de Cartas Hi-Lo" onClose={() => setExplanationOpen(false)}>
+      <Modal open={explanationOpen} title={useCardImages ? "Conteo Hi-Lo con cartas reales" : "Conteo de Cartas Hi-Lo"} onClose={() => setExplanationOpen(false)}>
         <ul>
           <li>Veras cartas de poker de uno o varios mazos.</li>
           <li>Cada carta aporta +1 (2-6), 0 (7-9) o -1 (10, figuras y As). Lleva la cuenta mentalmente.</li>
           <li>Cada bloque solicitara tu conteo. Usa los botones para continuar o terminar.</li>
           <li>Puedes ajustar el numero de mazos, el tamano del bloque y la velocidad antes de iniciar.</li>
+          {useCardImages && <li>Puedes combinar tamaño, rotación y perspectiva aleatorios, incluso las tres opciones a la vez. Cada carta mantiene su distorsión hasta que aparece la siguiente.</li>}
         </ul>
       </Modal>
     </div>
   );
+}
+
+export function ConteoHiLoConCartas(props: MathGameProps) {
+  return <ConteoHiLo {...props} useCardImages />;
 }
