@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Graphify generated files
+graphify-out/
+.codex/hooks.json
