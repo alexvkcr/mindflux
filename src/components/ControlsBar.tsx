@@ -21,6 +21,7 @@ export type GameKey =
   | "mentalCount"
   | "hiLoCount"
   | "hiLoCountCards"
+  | "hiLoTable"
   | "digitMemory";
 export type BookKey = "quijote" | "regenta" | "colmena";
 
@@ -39,7 +40,7 @@ const CATEGORY_GAMES: Record<CategoryKey, GameKey[]> = {
   speedReading: ["fixedReading", "columnReading"],
   visualField: ["doubleNumber", "schulteTable"],
   reactionTime: ["quickReflex", "quickMath", "grammarMatch"],
-  math: ["mathChain", "mentalCount", "hiLoCount", "hiLoCountCards"],
+  math: ["mathChain", "mentalCount", "hiLoCount", "hiLoCountCards", "hiLoTable"],
   memory: ["digitMemory"]
 };
 

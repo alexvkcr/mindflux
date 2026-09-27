@@ -14,6 +14,7 @@ import { ConcordanciaGramatical } from "../games/reaction/ConcordanciaGramatical
 import { SumaCadena } from "../games/math/SumaCadena";
 import { CuentaMental } from "../games/math/CuentaMental";
 import { ConteoHiLo, ConteoHiLoConCartas } from "../games/math/ConteoHiLo";
+import { MesaHiLo } from "../games/math/MesaHiLo";
 import { MemoryGame } from "../games/memory/MemoryGame";
 import { useColumnHighlightEngine } from "../games/speed-reading/ColumnReading/hooks/useColumnHighlightEngine";
 import { levelToWpm } from "../games/speed-reading/utils/wpm";
@@ -377,6 +378,10 @@ export function GameCanvas({
 
         {controls.category === "math" && controls.game === "hiLoCountCards" && (
           <ConteoHiLoConCartas running={controls.running} boardW={boardW} boardH={boardH} onTimeout={handleTimeout} />
+        )}
+
+        {controls.category === "math" && controls.game === "hiLoTable" && (
+          <MesaHiLo running={controls.running} boardW={boardW} boardH={boardH} onTimeout={handleTimeout} />
         )}
 
         {controls.category === "reactionTime" && controls.game === "quickReflex" && (

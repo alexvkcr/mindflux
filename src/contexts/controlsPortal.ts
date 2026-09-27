@@ -1,8 +1,8 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useRef, type ReactNode } from "react";
 
 interface ControlsPortalContextValue {
   node: ReactNode;
-  setNode: (next: ReactNode) => void;
+  register: (owner: symbol, next: ReactNode) => void;
 }
 
 export const ControlsPortalContext = createContext<ControlsPortalContextValue | undefined>(undefined);
@@ -20,5 +20,7 @@ export function useControlsPortalNode() {
 }
 
 export function useRegisterControlsPortal() {
-  return useControlsPortalContext().setNode;
+  const { register } = useControlsPortalContext();
+  const owner = useRef(Symbol("controls-portal-owner"));
+  return useCallback((next: ReactNode) => register(owner.current, next), [register]);
 }

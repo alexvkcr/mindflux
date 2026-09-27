@@ -33,6 +33,7 @@
       mentalCount: "Cuenta Mental 1-0-(-1)",
       hiLoCount: "Conteo de Cartas Hi-Lo",
       hiLoCountCards: "Conteo Hi-Lo con cartas reales",
+      hiLoTable: "Mesa Hi-Lo",
       digitMemory: "Memoria de d\u00edgitos"
     },
     bookLabel: "Texto",

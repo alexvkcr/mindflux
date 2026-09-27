@@ -9,6 +9,7 @@ import { Modal } from "../../components/ui/Modal";
 import { cardTransform, NO_DISTORTION, randomCardDistortion } from "./cardDistortions";
 import type { CardDistortion, DistortionOptions } from "./cardDistortions";
 import { closeCardBitmaps, loadCardBitmaps } from "./cardBitmaps";
+import { buildShoe as createShoe, getCardImageSrc, getCardValue, SHOE_OPTIONS, shuffle } from "./hiLoCards";
 
 function PracticeCard({ card, distortion, bitmap, presentation }: { card: string; distortion: CardDistortion; bitmap: ImageBitmap; presentation: number }) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -73,55 +74,8 @@ interface PreparedBlock {
   ready: Promise<boolean>;
 }
 
-const SHOE_OPTIONS = [
-  { label: "1 mazo", value: 1 },
-  { label: "2 mazos", value: 2 },
-  { label: "3 mazos", value: 3 },
-  { label: "4 mazos", value: 4 },
-  { label: "5 mazos", value: 5 },
-  { label: "6 mazos", value: 6 },
-  { label: "7 mazos", value: 7 },
-  { label: "8 mazos", value: 8 },
-  { label: "9 mazos", value: 9 },
-  { label: "Nivel 10 (18 mazos)", value: 18 }
-];
-
-const RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
-const SUITS = ["2660", "2665", "2666", "2663"].map((code) => String.fromCodePoint(parseInt(code, 16)));
-const SUIT_IMAGE_NAMES: Record<string, string> = {
-  "\u2660": "spades",
-  "\u2665": "hearts",
-  "\u2666": "diamonds",
-  "\u2663": "clubs"
-};
-
-function shuffle<T>(items: T[]): T[] {
-  const arr = [...items];
-  for (let i = arr.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function getCardValue(rank: string): number {
-  if (["2", "3", "4", "5", "6"].includes(rank)) {
-    return 1;
-  }
-  if (["7", "8", "9"].includes(rank)) {
-    return 0;
-  }
-  return -1;
-}
-
 interface ConteoHiLoProps extends MathGameProps {
   useCardImages?: boolean;
-}
-
-function getCardImageSrc(card: string): string {
-  const rank = card.slice(0, card.length - 1);
-  const suit = card.at(-1);
-  return `${import.meta.env.BASE_URL}assets/cards-game/${rank}-${SUIT_IMAGE_NAMES[suit ?? ""]}.png`;
 }
 
 export function ConteoHiLo({ running, onTimeout, useCardImages = false }: ConteoHiLoProps) {
@@ -175,15 +129,7 @@ export function ConteoHiLo({ running, onTimeout, useCardImages = false }: Conteo
   }, []);
 
   const buildShoe = useCallback(() => {
-    const deck: string[] = [];
-    for (let rep = 0; rep < shoeSize; rep += 1) {
-      for (const rank of RANKS) {
-        for (const suit of SUITS) {
-          deck.push(`${rank}${suit}`);
-        }
-      }
-    }
-    shoeRef.current = shuffle(deck);
+    shoeRef.current = createShoe(shoeSize);
     shoeIndexRef.current = 0;
   }, [shoeSize]);
 
