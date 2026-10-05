@@ -20,7 +20,7 @@ const LEVEL_MIN = 1;
 
 const LEVEL_MAX = 9;
 
-const WAIT_RANGE_MS: [number, number] = [1000, 5000];
+const APPEARANCE_INTERVAL_MS = 6000;
 
 const MAX_VISIBILITY_MS = 2000;
 
@@ -134,7 +134,7 @@ export function ConcordanciaGramatical({ running, onTimeout }: ConcordanciaGrama
     running,
     attempts: ATTEMPTS_PER_ROUND,
     paused: explanationOpen,
-    waitRangeMs: WAIT_RANGE_MS,
+    appearanceIntervalMs: APPEARANCE_INTERVAL_MS,
     onStimulus: handleStimulus,
     onFinished: () => onTimeout()
   });
@@ -293,6 +293,7 @@ export function ConcordanciaGramatical({ running, onTimeout }: ConcordanciaGrama
       <Modal open={explanationOpen} title="Concordancia Gramatical" onClose={() => setExplanationOpen(false)}>
         <ul>
           <li>Veras un articulo a la izquierda y un sustantivo a la derecha.</li>
+          <li>Las palabras aparecen cada 6 segundos, con un semaforo antes de cada intento.</li>
           <li>Pulsa Z si la combinacion concuerda en genero y numero, o X si no concuerda.</li>
           <li>Dispones de 2 segundos. El control de visibilidad define cuantos milisegundos quedan en pantalla.</li>
           <li>Las respuestas tardias o erroneas cuentan como 2000 ms. Tras 10 intentos veras tu promedio.</li>

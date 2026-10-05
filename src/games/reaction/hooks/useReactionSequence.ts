@@ -25,6 +25,7 @@ interface UseReactionSequenceOptions {
   running: boolean;
   attempts?: number;
   waitRangeMs?: [number, number];
+  appearanceIntervalMs?: number;
   responseLimitMs?: number;
   paused?: boolean;
   onStimulus?: (attempt: number) => void;
@@ -65,6 +66,7 @@ export function useReactionSequence(options: UseReactionSequenceOptions) {
     running,
     attempts = DEFAULT_ATTEMPTS,
     waitRangeMs,
+    appearanceIntervalMs,
     responseLimitMs = RESPONSE_LIMIT_MS,
     paused = false,
     onStimulus,
@@ -89,8 +91,9 @@ export function useReactionSequence(options: UseReactionSequenceOptions) {
   const resultsRef = useRef<ReactionAttemptResult[]>([]);
   const timersRef = useRef<ManagedTimer[]>([]);
   const responseTimerRef = useRef<ManagedTimer | null>(null);
-  const startAttemptRef = useRef<((index: number) => void) | null>(null);
+  const startAttemptRef = useRef<((index: number, responseElapsedMs?: number) => void) | null>(null);
   const completeAttemptRef = useRef<((result: ReactionAttemptResult) => void) | null>(null);
+  const pausedAtRef = useRef<number | null>(null);
 
   const updatePhase = useCallback((next: ReactionPhase) => {
     phaseRef.current = next;
@@ -152,8 +155,13 @@ export function useReactionSequence(options: UseReactionSequenceOptions) {
 
   useEffect(() => {
     if (paused) {
+      pausedAtRef.current = performance.now();
       pauseTimers();
     } else {
+      if (pausedAtRef.current !== null && startTimestampRef.current !== null) {
+        startTimestampRef.current += performance.now() - pausedAtRef.current;
+      }
+      pausedAtRef.current = null;
       resumeTimers();
     }
   }, [paused, pauseTimers, resumeTimers]);
@@ -207,7 +215,7 @@ export function useReactionSequence(options: UseReactionSequenceOptions) {
   );
 
   const startAttempt = useCallback(
-    (index: number) => {
+    (index: number, responseElapsedMs = 0) => {
       if (!runningRef.current) {
         return;
       }
@@ -226,18 +234,23 @@ export function useReactionSequence(options: UseReactionSequenceOptions) {
 
       scheduleTimer(() => {
         updatePhase("waiting");
-        const waitMs = randomBetween(waitMin, waitMax);
+        const delayMs = appearanceIntervalMs === undefined
+          ? randomBetween(waitMin, waitMax)
+          : Math.max(0, appearanceIntervalMs - COUNTDOWN_DURATION_MS - responseElapsedMs);
         scheduleTimer(() => {
           startStimulus(index);
-        }, waitMs);
+        }, delayMs);
       }, COUNTDOWN_DURATION_MS);
     },
-    [scheduleTimer, startStimulus, updatePhase, waitMax, waitMin]
+    [appearanceIntervalMs, scheduleTimer, startStimulus, updatePhase, waitMax, waitMin]
   );
 
   const completeAttempt = useCallback(
     (result: ReactionAttemptResult) => {
       awaitingResponseRef.current = false;
+      const responseElapsedMs = startTimestampRef.current === null
+        ? responseLimitMs
+        : Math.max(0, performance.now() - startTimestampRef.current);
       if (responseTimerRef.current) {
         removeTimer(responseTimerRef.current);
         responseTimerRef.current = null;
@@ -250,10 +263,10 @@ export function useReactionSequence(options: UseReactionSequenceOptions) {
       if (result.attempt >= totalAttempts) {
         finishGame();
       } else {
-        startAttemptRef.current?.(result.attempt + 1);
+        startAttemptRef.current?.(result.attempt + 1, responseElapsedMs);
       }
     },
-    [finishGame, onAttemptRecorded, removeTimer, totalAttempts]
+    [finishGame, onAttemptRecorded, removeTimer, responseLimitMs, totalAttempts]
   );
 
   useEffect(() => {

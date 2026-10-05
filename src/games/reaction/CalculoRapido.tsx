@@ -17,7 +17,7 @@ interface CalculoRapidoProps {
 
 const LEVEL_MIN = 1;
 const LEVEL_MAX = 9;
-const WAIT_RANGE_MS: [number, number] = [1000, 5000];
+const APPEARANCE_INTERVAL_MS = 6000;
 const MAX_EXPOSURE_MS = 2000;
 const MIN_EXPOSURE_MS = 250;
 
@@ -75,7 +75,7 @@ export function CalculoRapido({ running, onTimeout }: CalculoRapidoProps) {
   } = useReactionSequence({
     running,
     paused: explanationOpen,
-    waitRangeMs: WAIT_RANGE_MS,
+    appearanceIntervalMs: APPEARANCE_INTERVAL_MS,
     onStimulus: handleStimulus,
     onFinished: () => onTimeout()
   });
@@ -209,6 +209,7 @@ export function CalculoRapido({ running, onTimeout }: CalculoRapidoProps) {
       <Modal open={explanationOpen} title="Calculo Rapido" onClose={() => setExplanationOpen(false)}>
         <ul>
           <li>Tras el semaforo veras dos digitos del 0 al 9 con una separacion ajustable.</li>
+          <li>Los numeros aparecen cada 6 segundos, con un semaforo antes de cada intento.</li>
           <li>Pulsa Z si la suma es impar o X si es par. Tienes un maximo de 2 segundos.</li>
           <li>El control de exposicion define cuantos milisegundos permanecen los numeros en pantalla.</li>
           <li>Si te equivocas o te quedas sin tiempo, el intento cuenta como 2000 ms. Completa 10 intentos para ver tu promedio.</li>

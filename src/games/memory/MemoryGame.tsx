@@ -78,8 +78,32 @@ function Sequence({ sequence, mode, answer }: { sequence: string; mode: MemoryMo
   );
 }
 
+function MemorySemaphore({ countdown }: { countdown: number }) {
+  const lights = [
+    { value: 1, color: styles.red },
+    { value: 2, color: styles.yellow },
+    { value: 3, color: styles.green },
+  ];
+
+  return (
+    <div className={styles.semaphore}>
+      <span className={styles.srOnly} role="timer" aria-live="polite">{countdown}</span>
+      <div className={styles.semaphoreHousing} aria-hidden="true">
+        {lights.map(({ value, color }) => (
+          <span
+            key={value}
+            className={`${styles.semaphoreLight} ${color} ${countdown < value ? styles.lightOff : countdown === value ? styles.lightExtinguishing : ""}`}
+          >
+            {value}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function MemoryGame() {
-  const { config, phase, round, answer, locked, configure, start, setAnswer, reveal } = useMemoryGame();
+  const { config, phase, countdown, round, answer, locked, configure, start, setAnswer, reveal } = useMemoryGame();
   const registerControls = useRegisterControlsPortal();
   const answerInput = useRef<HTMLInputElement>(null);
   const nextButton = useRef<HTMLButtonElement>(null);
@@ -132,7 +156,7 @@ export function MemoryGame() {
       </p>
       <div className={styles.board}>
         <p className={styles.phase} role="status">
-          {phase === "ready" ? "A tu ritmo" : phase === "memorizing" ? "Memoriza" : phase === "answering" ? "Escribe lo que recuerdas" : "Tu respuesta"}
+          {phase === "ready" ? "A tu ritmo" : phase === "countdown" ? "Empieza en" : phase === "memorizing" ? "Memoriza" : phase === "answering" ? "Escribe lo que recuerdas" : "Tu respuesta"}
         </p>
         {phase === "ready" && (
           <div className={styles.ready}>
@@ -140,6 +164,7 @@ export function MemoryGame() {
             <PrimaryButton onClick={start}>Mostrar</PrimaryButton>
           </div>
         )}
+        {phase === "countdown" && <MemorySemaphore countdown={countdown} />}
         {phase === "memorizing" && round && <Sequence sequence={round.sequence} mode={round.mode} />}
         {phase === "answering" && round && (
           <form className={styles.answerForm} onSubmit={handleReveal}>

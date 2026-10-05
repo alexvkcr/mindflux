@@ -8,19 +8,21 @@ import {
   type MemoryConfig,
 } from "./utils";
 
-type Phase = "ready" | "memorizing" | "answering" | "result";
+type Phase = "ready" | "countdown" | "memorizing" | "answering" | "result";
 interface Round extends MemoryConfig {
   sequence: string;
 }
 interface State {
   config: MemoryConfig;
   phase: Phase;
+  countdown: number;
   round: Round | null;
   answer: string;
 }
 type Action =
   | { type: "configure"; config: Partial<MemoryConfig> }
   | { type: "start"; round: Round }
+  | { type: "tick"; round: Round }
   | { type: "hide"; round: Round }
   | { type: "answer"; answer: string }
   | { type: "reveal" };
@@ -34,8 +36,13 @@ function reducer(state: State, action: Action): State {
     }
     case "start":
       return state.phase === "ready" || state.phase === "result"
-        ? { ...state, phase: "memorizing", round: action.round, answer: "" }
+        ? { ...state, phase: "countdown", countdown: 3, round: action.round, answer: "" }
         : state;
+    case "tick":
+      if (state.phase !== "countdown" || state.round !== action.round) return state;
+      return state.countdown > 1
+        ? { ...state, countdown: state.countdown - 1 }
+        : { ...state, phase: "memorizing", countdown: 0 };
     case "hide":
       return state.phase === "memorizing" && state.round === action.round ? { ...state, phase: "answering" } : state;
     case "answer":
@@ -51,10 +58,17 @@ export function useMemoryGame() {
   const [state, dispatch] = useReducer(reducer, {
     config: DEFAULT_MEMORY_CONFIG,
     phase: "ready",
+    countdown: 0,
     round: null,
     answer: "",
   });
   const { config, phase, round } = state;
+
+  useEffect(() => {
+    if (phase !== "countdown" || !round) return;
+    const timeout = window.setTimeout(() => dispatch({ type: "tick", round }), 1000);
+    return () => window.clearTimeout(timeout);
+  }, [phase, round, state.countdown]);
 
   useEffect(() => {
     if (phase !== "memorizing" || !round) return;
@@ -86,5 +100,5 @@ export function useMemoryGame() {
   const setAnswer = useCallback((answer: string) => dispatch({ type: "answer", answer }), []);
   const reveal = useCallback(() => dispatch({ type: "reveal" }), []);
 
-  return { ...state, configure, start, setAnswer, reveal, locked: phase === "memorizing" || phase === "answering" };
+  return { ...state, configure, start, setAnswer, reveal, locked: phase === "countdown" || phase === "memorizing" || phase === "answering" };
 }
