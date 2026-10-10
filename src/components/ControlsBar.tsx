@@ -14,6 +14,7 @@ export type GameKey =
   | "columnReading"
   | "doubleNumber"
   | "schulteTable"
+  | "schulteContinuous"
   | "quickReflex"
   | "quickMath"
   | "grammarMatch"
@@ -38,7 +39,7 @@ export type ControlsState = {
 const CATEGORY_GAMES: Record<CategoryKey, GameKey[]> = {
   eyeMovement: ["basic", "isoDistance", "isoRhythm"],
   speedReading: ["fixedReading", "columnReading"],
-  visualField: ["doubleNumber", "schulteTable"],
+  visualField: ["doubleNumber", "schulteTable", "schulteContinuous"],
   reactionTime: ["quickReflex", "quickMath", "grammarMatch"],
   math: ["mathChain", "mentalCount", "hiLoCount", "hiLoCountCards", "hiLoTable"],
   memory: ["digitMemory"]

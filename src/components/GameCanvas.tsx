@@ -355,8 +355,10 @@ export function GameCanvas({
           />
         )}
 
-        {controls.category === "visualField" && controls.game === "schulteTable" && (
+        {controls.category === "visualField" && (controls.game === "schulteTable" || controls.game === "schulteContinuous") && (
           <SchulteTable
+            key={controls.game}
+            continuous={controls.game === "schulteContinuous"}
             running={controls.running}
             boardW={boardW}
             boardH={boardH}

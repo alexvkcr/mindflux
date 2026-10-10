@@ -26,6 +26,7 @@
       columnReading: "Lectura en columnas",
       doubleNumber: "Doble numero",
       schulteTable: "Tabla Schulte",
+      schulteContinuous: "Tablas Schulte continuas",
       quickReflex: "Reflejo Rapido",
       quickMath: "Calculo Rapido",
       grammarMatch: "Concordancia Gramatical",
