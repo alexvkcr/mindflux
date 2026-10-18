@@ -184,21 +184,21 @@ export function SchulteTable({ running, onTimeout, continuous = false }: Props) 
   const controls = useMemo(() => (
     <div className={controlStyles.panel}>
       <label className={controlStyles.control}>
-        <span className={controlStyles.label}>Cuadrícula</span>
-        <select value={gridSize} disabled={running} onChange={(event) => setGridSize(event.target.value as GridSize)}>
+        <span id="schulte-grid-label" className={controlStyles.label}>Cuadrícula</span>
+        <select aria-labelledby="schulte-grid-label" value={gridSize} disabled={running} onChange={(event) => setGridSize(event.target.value as GridSize)}>
           {GRID_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
       </label>
       <label className={controlStyles.control}>
-        <span className={controlStyles.label}>Contenido</span>
-        <select value={contentMode} disabled={running} onChange={(event) => setContentMode(event.target.value as ContentMode)}>
+        <span id="schulte-content-label" className={controlStyles.label}>Contenido</span>
+        <select aria-labelledby="schulte-content-label" value={contentMode} disabled={running} onChange={(event) => setContentMode(event.target.value as ContentMode)}>
           {CONTENT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
       </label>
       {continuous && (
         <label className={controlStyles.control}>
-          <span className={controlStyles.label}>Tableros por sesión</span>
-          <select value={boardCount} disabled={running} onChange={(event) => setBoardCount(normalizeBoardCount(Number(event.target.value)))}>
+          <span id="schulte-count-label" className={controlStyles.label}>Tableros por sesión</span>
+          <select aria-labelledby="schulte-count-label" value={boardCount} disabled={running} onChange={(event) => setBoardCount(normalizeBoardCount(Number(event.target.value)))}>
             {Array.from({ length: 15 }, (_, index) => index + 1).map((count) => <option key={count} value={count}>{count}</option>)}
           </select>
         </label>

@@ -45,3 +45,17 @@ Pruebas unitarias sin navegador:
 ```powershell
 node --experimental-strip-types --test tests/*.test.mjs
 ```
+
+Para Tabla Schulte y Tablas Schulte continuas, con el mismo servidor de producción
+y `PLAYWRIGHT_MODULE` / `CHROME_PATH`:
+
+```powershell
+node tests/browser/schulte.mjs
+```
+
+Comprueba el diálogo a pantalla completa, el bloqueo del scroll, la cancelación
+con la cruceta y Escape, la restauración de posición y foco, las cuentas atrás de
+3 segundos, los resultados independientes y sus medias, las cinco cuadrículas
+en horizontal, las respuestas con teclado y una sesión completa de 15 tableros.
+Usa el reloj virtual de Playwright para las cuentas atrás. `SCREENSHOT_PREFIX`
+permite guardar capturas en vertical y horizontal.

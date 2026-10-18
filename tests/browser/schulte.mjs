@@ -50,6 +50,7 @@ try {
   await page.clock.pauseAt(new Date());
   await page.getByLabel('Cuadrícula', { exact: true }).selectOption('3x3');
   await start(); await advanceCountdown(); await checkBoundsAndLock();
+  if (process.env.SCREENSHOT_PREFIX) await page.screenshot({ path: `${process.env.SCREENSHOT_PREFIX}-portrait.png` });
   await completeNumbers(9, 1); await phase('finished');
   assert.equal(await dialog.count(), 0);
   assert.equal(await page.locator('tbody tr').count(), 1);
@@ -58,12 +59,17 @@ try {
   assert.ok(Number(await page.locator('[data-time-ms]').getAttribute('data-time-ms')) < 3000, 'countdown excluded');
 
   // Cancellation during preparation must clear timers and restore scroll and focus.
+  await page.evaluate(() => window.scrollTo(0, 50));
+  await page.getByRole('button', { name: 'Arranque', exact: true }).scrollIntoViewIfNeeded();
+  const previousScroll = await page.evaluate(() => window.scrollY);
   await start(); await phase('countdown');
   await dialog.getByRole('button', { name: 'Cancelar partida' }).click();
   await page.clock.runFor(4000); await phase('idle');
   assert.equal(await dialog.count(), 0);
   assert.equal(await page.locator('tbody tr').count(), 0);
   assert.equal(await page.getByRole('button', { name: 'Arranque', exact: true }).evaluate(el => el === document.activeElement), true);
+  assert.equal(await page.evaluate(() => window.scrollY), previousScroll);
+  console.log('Single board and countdown cancellation passed.');
 
   await page.locator('select').nth(1).selectOption('schulteContinuous');
   const counts = page.getByLabel('Tableros por sesión');
@@ -90,6 +96,7 @@ try {
   assert.equal(await page.locator('tbody tr').count(), 0);
   await start(); await advanceCountdown(); await page.keyboard.press('Escape'); await phase('idle');
   assert.equal(await dialog.count(), 0);
+  console.log('Continuous session results, averages and cancellation passed.');
 
   // All grid shapes fit in a small landscape viewport; keyboard and mixed content still work.
   await page.setViewportSize({ width: 667, height: 375 });
@@ -97,6 +104,7 @@ try {
   for (const size of ['3x3', '3x4', '4x4', '4x5', '5x5']) {
     await page.getByLabel('Cuadrícula', { exact: true }).selectOption(size);
     await start(); await advanceCountdown(); await checkBoundsAndLock();
+    if (size === '5x5' && process.env.SCREENSHOT_PREFIX) await page.screenshot({ path: `${process.env.SCREENSHOT_PREFIX}-landscape.png` });
     await page.keyboard.press('Escape'); await phase('idle');
   }
   await page.getByLabel('Cuadrícula', { exact: true }).selectOption('3x3');
@@ -108,6 +116,22 @@ try {
   }
   await phase('finished');
   assert.equal(await page.locator('tbody tr td').last().innerText(), '0');
+
+  // The maximum session length finishes exactly at board fifteen, even with rapid input.
+  await page.getByLabel('Contenido', { exact: true }).selectOption('numbers');
+  await counts.selectOption('15');
+  await start();
+  for (let board = 1; board <= 15; board++) {
+    await advanceCountdown();
+    await page.clock.runFor(100);
+    await dialog.evaluate(el => {
+      for (let value = 1; value <= 9; value++) el.querySelector(`[aria-label="Elemento ${value}"]`).click();
+    });
+    await phase(board === 15 ? 'finished' : 'countdown');
+  }
+  assert.equal(await page.locator('tbody tr').count(), 15);
+  assert.equal(await dialog.count(), 0);
+  assert.equal(await page.locator('tfoot td').last().innerText(), '0');
   assert.deepEqual(errors, []);
   console.log('Schulte: fullscreen, scroll lock, cancellation, 3-second transitions, independent results, averages, keyboard and landscape layouts passed.');
 } finally {
