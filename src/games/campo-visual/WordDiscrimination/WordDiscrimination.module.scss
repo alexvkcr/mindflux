@@ -1,0 +1,98 @@
+@use '../../../styles/variables' as vars;
+
+.root {
+  width: 100%;
+  min-width: 0;
+  padding: clamp(16px, 4vw, 30px);
+  color: vars.$text;
+  text-align: center;
+}
+
+.header h2 { margin: 0 0 8px; font-size: clamp(1.3rem, 3vw, 1.8rem); }
+.header p { margin: 0 auto 20px; max-width: 56ch; color: vars.$text-dim; line-height: 1.5; }
+
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+.settings label { display: grid; gap: 5px; min-width: 120px; font-size: .9rem; color: vars.$text-dim; }
+.settings select {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid vars.$border;
+  border-radius: 9px;
+  background: vars.$bg-2;
+  color: vars.$text;
+  font: inherit;
+}
+.detail { padding: 10px; color: vars.$text-dim; font-variant-numeric: tabular-nums; }
+.progress { min-height: 26px; color: vars.$text-dim; font-weight: 600; }
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+  margin-top: 16px;
+  min-height: 150px;
+}
+.word {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 150px;
+  padding: 14px 8px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .06);
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  font-size: clamp(1.15rem, 3vw, 2rem);
+  font-weight: 650;
+  letter-spacing: .02em;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.instruction { min-height: 30px; margin: 18px 0 10px; font-weight: 600; }
+.actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.actions button {
+  min-height: 72px;
+  border: 1px solid #79c7ff;
+  border-radius: 14px;
+  background: #12659c;
+  color: white;
+  font: inherit;
+  font-size: clamp(1rem, 3vw, 1.3rem);
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.actions button:nth-child(2) { background: #654ca7; border-color: #baabff; }
+.actions button:disabled { opacity: .42; cursor: default; }
+.actions button:focus-visible, .settings select:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.actions kbd { margin-left: 6px; font-size: .8rem; opacity: .8; }
+.reveal { min-height: 28px; color: vars.$text-dim; overflow-wrap: anywhere; }
+.summary { text-align: left; }
+.summary h3 { text-align: center; }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.stats p { display: grid; gap: 4px; margin: 0; padding: 14px; border: 1px solid vars.$border; border-radius: 10px; background: rgba(255,255,255,.05); }
+.stats strong { font-size: 1.45rem; }
+.stats span { color: vars.$text-dim; }
+.misses { max-height: 260px; overflow: auto; }
+.misses ul { padding-left: 22px; line-height: 1.7; overflow-wrap: anywhere; }
+
+@media (max-width: 600px) {
+  .pair { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .word { min-height: 82px; font-size: clamp(1.15rem, 5vw, 1.7rem); }
+  .actions button { min-height: 76px; }
+}
+@media (max-width: 390px) {
+  .settings { gap: 8px; }
+  .settings label { min-width: 105px; }
+  .actions { gap: 8px; }
+  .actions kbd { display: none; }
+}

@@ -17,6 +17,7 @@ export type GameKey =
   | "doubleNumber"
   | "schulteTable"
   | "schulteContinuous"
+  | "wordDiscrimination"
   | "quickReflex"
   | "quickMath"
   | "grammarMatch"
@@ -25,7 +26,8 @@ export type GameKey =
   | "hiLoCount"
   | "hiLoCountCards"
   | "hiLoTable"
-  | "digitMemory";
+  | "digitMemory"
+  | "runningSpan";
 export type BookKey = "quijote" | "regenta" | "colmena" | "custom";
 
 export type ControlsState = {
@@ -43,10 +45,10 @@ export type ControlsState = {
 const CATEGORY_GAMES: Record<CategoryKey, GameKey[]> = {
   eyeMovement: ["basic", "isoDistance", "isoRhythm"],
   speedReading: ["fixedReading", "columnReading", "guidedReading"],
-  visualField: ["doubleNumber", "schulteTable", "schulteContinuous"],
+  visualField: ["doubleNumber", "schulteTable", "schulteContinuous", "wordDiscrimination"],
   reactionTime: ["quickReflex", "quickMath", "grammarMatch"],
   math: ["mathChain", "mentalCount", "hiLoCount", "hiLoCountCards", "hiLoTable"],
-  memory: ["digitMemory"]
+  memory: ["digitMemory", "runningSpan"]
 };
 
 const DEFAULT_BOOK: BookKey = "quijote";

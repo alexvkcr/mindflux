@@ -1,0 +1,78 @@
+@use '../../../styles/variables' as vars;
+
+.container { width: 100%; min-width: 0; padding: 24px; color: vars.$text; }
+.header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.header h2 { margin: 0; font-size: 1.3rem; }
+.badge { padding: 6px 12px; border: 1px solid vars.$border; border-radius: 999px; color: vars.$text-dim; font-size: .8rem; }
+.instructions { max-width: 62ch; margin: 16px 0 22px; color: vars.$text-dim; line-height: 1.55; }
+.controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+.controls label { display: grid; gap: 6px; min-width: 0; color: vars.$text-dim; font-size: .85rem; }
+.controls select {
+  min-width: 0; width: 100%; min-height: 44px; padding: 8px 10px;
+  border: 1px solid vars.$border; border-radius: 8px;
+  background: vars.$bg-1; color: vars.$text; font: inherit; font-size: .95rem;
+}
+.controls select:disabled { opacity: .6; }
+.board {
+  display: grid; place-items: center; min-width: 0; min-height: 350px;
+  padding: 24px 14px; border: 1px solid vars.$border;
+  border-radius: vars.$radius; background: rgba(0, 0, 0, .18);
+}
+.panel, .answerForm, .correction, .summary { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; text-align: center; }
+.panel p, .correction p, .summary p { margin: 0; }
+.panel strong { color: #8bd0ff; }
+.eyebrow { color: vars.$text-dim; font-size: .85rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.k { font-size: 1.7em; }
+.stimulus {
+  display: grid; place-items: center; width: min(100%, 260px); height: 180px;
+  border: 1px solid rgba(255,255,255,.16); border-radius: 16px;
+  background: rgba(255,255,255,.06); font-family: ui-monospace, Consolas, monospace;
+  font-size: clamp(5rem, 22vw, 8rem); line-height: 1; font-variant-numeric: tabular-nums;
+}
+.primary, .secondary, .restart {
+  min-height: 48px; padding: 10px 18px; border: 1px solid #69c2ff;
+  border-radius: 9px; background: #166ca5; color: #fff;
+  font: inherit; font-weight: 700; cursor: pointer; touch-action: manipulation;
+}
+.secondary { background: vars.$bg-2; border-color: vars.$border; }
+.restart { display: block; margin: 16px auto 0; background: transparent; border-color: vars.$border; font-size: .88rem; }
+.answerForm { max-width: 340px; }
+.answerForm label { font-weight: 650; }
+.answerForm input {
+  width: 100%; min-width: 0; padding: 13px; border: 1px solid vars.$border;
+  border-radius: 9px; background: vars.$bg-1; color: vars.$text;
+  font-family: ui-monospace, Consolas, monospace; font-size: 1.6rem;
+  letter-spacing: .14em; text-align: center; font-variant-numeric: tabular-nums;
+}
+.hint { margin: 0; color: vars.$text-dim; font-size: .84rem; }
+.keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; }
+.keypad button {
+  min-height: 52px; border: 1px solid rgba(255,255,255,.2); border-radius: 9px;
+  background: vars.$bg-2; color: vars.$text; font: inherit; font-size: 1.35rem;
+  font-weight: 650; cursor: pointer; touch-action: manipulation;
+}
+.keypad .submitKey { background: #166ca5; border-color: #69c2ff; }
+.correction h3, .summary h3 { margin: 0; }
+.digits { font-family: ui-monospace, Consolas, monospace; letter-spacing: .1em; overflow-wrap: anywhere; }
+.positions { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; width: 100%; }
+.positions > div { display: grid; gap: 3px; min-width: 58px; padding: 8px; border: 1px solid vars.$border; border-radius: 8px; }
+.positions span, .positions small { font-size: .72rem; }
+.positions strong { font-size: 1.3rem; }
+.positionCorrect { background: rgba(58, 190, 112, .18); }
+.positionWrong { background: rgba(237, 87, 87, .2); }
+.positionWrong small { color: #ffb5b5; }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: 100%; }
+.stats p { display: grid; gap: 5px; padding: 12px; border: 1px solid vars.$border; border-radius: 10px; background: rgba(255,255,255,.05); }
+.stats strong { font-size: 1.45rem; }
+.stats span { color: vars.$text-dim; font-size: .85rem; }
+.resultList { display: grid; gap: 6px; width: 100%; max-height: 300px; overflow: auto; text-align: left; }
+.resultList > div { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; padding: 9px; border-bottom: 1px solid vars.$border; font-size: .88rem; }
+.resultList span { color: vars.$text-dim; }
+.container :focus-visible { outline: 3px solid vars.$primary; outline-offset: 3px; }
+
+@media (max-width: 480px) {
+  .container { padding: 14px; }
+  .controls { grid-template-columns: minmax(0, 1fr); }
+  .board { min-height: 310px; padding: 20px 10px; }
+  .stats { grid-template-columns: minmax(0, 1fr); }
+}

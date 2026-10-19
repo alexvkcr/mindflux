@@ -28,6 +28,7 @@
       doubleNumber: "Doble numero",
       schulteTable: "Tabla Schulte",
       schulteContinuous: "Tablas Schulte continuas",
+      wordDiscrimination: "Discriminación visual de palabras",
       quickReflex: "Reflejo Rapido",
       quickMath: "Calculo Rapido",
       grammarMatch: "Concordancia Gramatical",
@@ -36,7 +37,8 @@
       hiLoCount: "Conteo de Cartas Hi-Lo",
       hiLoCountCards: "Conteo Hi-Lo con cartas reales",
       hiLoTable: "Mesa Hi-Lo",
-      digitMemory: "Memoria de d\u00edgitos"
+      digitMemory: "Memoria de d\u00edgitos",
+      runningSpan: "Ventana de memoria"
     },
     bookLabel: "Texto",
     books: {

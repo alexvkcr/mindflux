@@ -6,6 +6,7 @@ import { EyeMovementIsoRhythm } from "../games/eye-movement/IsoRhythm";
 import { ReadingExercise } from "../games/speed-reading/ReadingExercise";
 import { DobleNumero } from "../games/campo-visual/DobleNumero/DobleNumero";
 import { SchulteTable } from "../games/campo-visual/SchulteTable/SchulteTable";
+import { WordDiscrimination } from "../games/campo-visual/WordDiscrimination/WordDiscrimination";
 import { ReflejoRapido } from "../games/reaction/ReflejoRapido";
 import { CalculoRapido } from "../games/reaction/CalculoRapido";
 import { ConcordanciaGramatical } from "../games/reaction/ConcordanciaGramatical";
@@ -14,6 +15,7 @@ import { CuentaMental } from "../games/math/CuentaMental";
 import { ConteoHiLo, ConteoHiLoConCartas } from "../games/math/ConteoHiLo";
 import { MesaHiLo } from "../games/math/MesaHiLo";
 import { MemoryGame } from "../games/memory/MemoryGame";
+import { RunningSpan } from "../games/memory/RunningSpan/RunningSpan";
 import styles from "./GameCanvas.module.scss";
 
 export function GameCanvas({
@@ -157,6 +159,10 @@ export function GameCanvas({
           />
         )}
 
+        {controls.category === "visualField" && controls.game === "wordDiscrimination" && (
+          <WordDiscrimination running={controls.running} onTimeout={handleTimeout} />
+        )}
+
         {controls.category === "math" && controls.game === "mathChain" && (
           <SumaCadena running={controls.running} boardW={boardW} boardH={boardH} onTimeout={handleTimeout} />
         )}
@@ -191,6 +197,9 @@ export function GameCanvas({
 
         {controls.category === "memory" && controls.game === "digitMemory" && (
           <MemoryGame />
+        )}
+        {controls.category === "memory" && controls.game === "runningSpan" && (
+          <RunningSpan />
         )}
       </div>
     </section>
