@@ -24,6 +24,7 @@
       isoRhythm: "Ritmo Isom\u00e9trico",
       fixedReading: "Lectura Fija",
       columnReading: "Lectura en columnas",
+      guidedReading: "Lectura guiada por páginas",
       doubleNumber: "Doble numero",
       schulteTable: "Tabla Schulte",
       schulteContinuous: "Tablas Schulte continuas",

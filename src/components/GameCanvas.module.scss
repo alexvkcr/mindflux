@@ -1,4 +1,4 @@
-﻿.wrap {
+.wrap {
   display: grid;
   place-items: center;
   padding: 16px 20px;
@@ -19,88 +19,8 @@
   box-sizing: border-box;
 }
 
-.columnShell {
-  
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  padding: 16px;
-  box-sizing: border-box;
-  gap: 12px;
-}
+.boardFlexible { max-height: none; overflow: visible; }
+.readingWrap { grid-template-columns: minmax(0, 1fr); }
+.readingBoard { min-width: 0; max-width: 1000px; border: 1px solid rgba(255, 255, 255, 0.18); }
 
-.topBar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  justify-content: center;
-}
-
-.badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.pauseBtn {
-  padding: 8px 14px;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-  background: #2b8af7;
-  color: #ffffff;
-  transition: background 160ms ease;
-}
-
-.pauseBtn[disabled] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.pauseBtn:not([disabled]):hover {
-  background: #4195f8;
-}
-
-.startBtn {
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.columnBoard {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  width: 100%;
-
-  border: 2px solid #ffffffcc;
-  border-radius: 12px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #111, #1b1b1f);
-  box-sizing: border-box;
-  padding: 16px;
-}
-
-
-
-
-.noFrame {
-  border: none !important;
-  background: transparent !important;
-}
-
-
-
-.noFrame {
-  border: none !important;
-  background: transparent !important;
-}
-.boardFlexible {
-  max-height: none;
-  overflow: visible;
-}
+@media (max-width: 480px) { .readingWrap { padding-inline: 10px; } }

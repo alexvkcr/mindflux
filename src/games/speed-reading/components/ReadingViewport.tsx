@@ -2,19 +2,17 @@
 
 export interface ReadingViewportProps {
   line: string;
-  charWidth: number;
+  referenceWidthEm: number;
 }
 
-export function ReadingViewport({ line, charWidth }: ReadingViewportProps) {
+export function ReadingViewport({ line, referenceWidthEm }: ReadingViewportProps) {
   return (
-    <div className={styles.viewport} data-testid="reading-viewport" aria-live="polite">
+    <div className={styles.viewport} data-testid="reading-viewport" aria-label="Bloque de lectura">
       <div
-        key={line}
         className={styles.line}
         data-testid="reading-viewport-line"
-        style={{ width: `${charWidth}ch` }}
       >
-        {line}
+        <span style={{ minWidth: `${referenceWidthEm}em` }}>{line}</span>
       </div>
     </div>
   );

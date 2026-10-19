@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test:memory": "node --experimental-strip-types --test tests/memory-utils.test.mjs",
+    "test:reading": "node --experimental-strip-types --test tests/reading.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,0 +1,35 @@
+.setup { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+.setup p { margin: 0; font-size: 0.9rem; line-height: 1.6; color: #c7c9d2; }
+.setup > button { align-self: flex-start; background: #1670f8; color: white; }
+.setup details { border: 1px solid #42434c; border-radius: 10px; padding: 12px; }
+.setup summary { cursor: pointer; }
+.setup details p { margin-top: 10px; }
+.dialog {
+  position: fixed; inset: 0; width: 100%; max-width: none; height: 100dvh; max-height: none;
+  margin: 0; padding: 0; border: 0; border-radius: 0; background: #101113; color: #f5f6fa;
+  overflow: hidden; overscroll-behavior: none;
+}
+.dialog::backdrop { background: #101113; }
+.shell { height: 100%; width: 100%; padding: 16px 20px; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; overflow: hidden; }
+.header { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.header h2 { margin: 0; font-size: 1.05rem; }
+.header span { margin-left: auto; font-size: 0.85rem; white-space: nowrap; }
+.close { flex-shrink: 0; font-size: 1.4rem; line-height: 1; padding: 8px 12px; }
+.page { min-height: 0; min-width: 0; overflow: hidden; padding: 0 4px; }
+.document { width: max-content; max-width: 100%; margin-inline: auto; font-size: 20px; font-weight: 400; font-kerning: none; font-variant-ligatures: none; line-height: 36px; }
+.document p { padding: 0; margin: 0; }
+.line { display: block; height: 36px; white-space: pre; }
+.line strong { font-weight: 400; -webkit-text-stroke: 1px currentColor; color: #fff5b3; background: #564621; border-radius: 3px; box-shadow: 0 2px 0 #f9d65b; }
+.footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; }
+.navigation { display: flex; gap: 8px; }
+.navigation button { padding: 9px 14px; }
+.footer > span { font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.dialog button:disabled { opacity: 0.4; cursor: default; }
+.dialog :focus-visible { outline: 2px solid #91bfff; outline-offset: 2px; }
+@media (max-width: 400px) {
+  .header { gap: 6px; }
+  .header h2 { font-size: 0.9rem; }
+  .header span { font-size: 0.75rem; }
+  .navigation { gap: 6px; }
+  .navigation button { padding: 8px 10px; font-size: 0.85rem; }
+}

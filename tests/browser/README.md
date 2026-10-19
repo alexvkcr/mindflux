@@ -59,3 +59,47 @@ con la cruceta y Escape, la restauración de posición y foco, las cuentas atrá
 en horizontal, las respuestas con teclado y una sesión completa de 15 tableros.
 Usa el reloj virtual de Playwright para las cuentas atrás. `SCREENSHOT_PREFIX`
 permite guardar capturas en vertical y horizontal.
+
+Para lectura fija y lectura en columnas:
+
+```powershell
+npm run test:reading
+node --experimental-strip-types tests/browser/reading.mjs
+```
+
+El navegador comprueba que haya un único conjunto de controles, que el ritmo no
+cambie al ampliar el bloque y que las velocidades se calculen según el ancho de
+referencia y el texto. Verifica el orden de los bloques, la pausa sin pérdida de
+exposición, los límites de 30 y 45 segundos, el reinicio y la limpieza al salir.
+Comprueba las tres obras y los cinco anchos en ventanas de 1280 × 900, 320 × 640
+y 667 × 375, incluyendo recortes, desbordamiento horizontal y tamaño de fuente.
+`SCREENSHOT_PREFIX` guarda capturas de ambos ejercicios en escritorio y móvil.
+
+Para «Lectura guiada por páginas», con el mismo servidor y las mismas
+variables de entorno de Playwright:
+
+```powershell
+node --experimental-strip-types tests/browser/guided-reading.mjs
+```
+
+Comprueba las tres obras y todas las combinaciones habilitadas de ancho y ciclos
+por línea en escritorio, móvil y horizontal. Verifica pantalla completa, ausencia
+de scroll, límites físicos y de caracteres, una sola línea por ciclo, palabras
+completas y resaltado de alto contraste. Recorre automáticamente todas las páginas
+y comprueba la cobertura exacta del texto, Anterior y Siguiente, pausa y tiempo de
+exposición al navegar. Redimensiona con la lectura pausada para verificar el ajuste
+de opciones y conservación de la posición. Cerrar y Escape restauran el scroll y
+cancelan el temporizador. `SCREENSHOT_PREFIX` guarda una captura del lector móvil.
+
+Para la carga de TXT en los tres ejercicios:
+
+```powershell
+node --experimental-strip-types tests/browser/reading-upload.mjs
+```
+
+Comprueba la conservación del archivo al cambiar de ejercicio, UTF-8 y UTF-16,
+el texto mostrado como letras aunque contenga etiquetas, los controles durante
+la ejecución y el rechazo de archivos vacíos, extensiones incorrectas, binarios
+renombrados, codificación inválida y controles después de un prefijo de texto.
+Carga un archivo de exactamente 10 MiB en los tres juegos y verifica el avance,
+la paginación de la lectura guiada, el exceso de tamaño y la eliminación del TXT.

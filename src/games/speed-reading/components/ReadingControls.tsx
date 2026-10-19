@@ -1,8 +1,9 @@
 ﻿import type { ChangeEvent } from "react";
 
-import type { BookKey } from "../../../components/ControlsBar";
-import { WPM_BY_LEVEL, type Level } from "../utils/wpm";
-import { WIDTH_MAP, type WidthIndex } from "../utils/widthMap";
+import type { BookKey, ControlsState } from "../../../components/ControlsBar";
+import { PACE_MS_BY_LEVEL } from "../utils/pace";
+import { WIDTH_MAP, referenceWords, type WidthIndex } from "../utils/widthMap";
+import type { ReadingCombination } from "../utils/pagedReading";
 
 import styles from "./ReadingControls.module.scss";
 
@@ -10,7 +11,11 @@ export interface ReadingControlsProps {
   book: BookKey;
   level: number;
   widthIdx: WidthIndex;
-  onChange: (state: { book: BookKey; level: number; widthIdx: WidthIndex }) => void;
+  disabled?: boolean;
+  lineCycles?: number;
+  customTextName?: string;
+  combinations?: ReadingCombination[];
+  onChange: (state: Partial<ControlsState>) => void;
 }
 
 const BOOK_OPTIONS: Array<{ value: BookKey; label: string }> = [
@@ -19,9 +24,7 @@ const BOOK_OPTIONS: Array<{ value: BookKey; label: string }> = [
   { value: "colmena", label: "Colmena" }
 ];
 
-const LEVEL_OPTIONS: Array<{ level: Level; wpm: number }> = (
-  Object.entries(WPM_BY_LEVEL) as Array<[string, number]>
-).map(([lvl, wpm]) => ({ level: Number(lvl) as Level, wpm }));
+const LEVEL_OPTIONS = PACE_MS_BY_LEVEL.map((_, index) => index + 1);
 
 const WIDTH_ENTRIES = (Object.entries(WIDTH_MAP) as Array<[string, number]>).map(([key, width]) => ({
   idx: Number(key) as WidthIndex,
@@ -32,6 +35,10 @@ export function ReadingControls({
   book,
   level,
   widthIdx,
+  disabled = false,
+  lineCycles,
+  customTextName,
+  combinations,
   onChange
 }: ReadingControlsProps) {
   const handleBookChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -46,14 +53,18 @@ export function ReadingControls({
 
   const handleWidthChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextWidth = Number(event.target.value) as WidthIndex;
-    onChange({ book, level, widthIdx: nextWidth });
+    const nextCycles = combinations?.find(option => option.widthIdx === nextWidth && option.lineCycles === lineCycles)?.lineCycles
+      ?? combinations?.find(option => option.widthIdx === nextWidth)?.lineCycles;
+    onChange({ book, level, widthIdx: nextWidth, ...(nextCycles ? { readingLineCycles: nextCycles } : {}) });
   };
 
   return (
     <div className={styles.controls} data-testid="reading-controls">
       <label className={styles.control}>
-        <span className={styles.label}>Texto</span>
+        <span id="reading-book-label" className={styles.label}>Texto</span>
         <select
+          aria-labelledby="reading-book-label"
+          disabled={disabled}
           className={styles.select}
           value={book}
           onChange={handleBookChange}
@@ -64,40 +75,57 @@ export function ReadingControls({
               {option.label}
             </option>
           ))}
+          {customTextName && <option value="custom">TXT: {customTextName}</option>}
         </select>
       </label>
 
       <label className={styles.control}>
-        <span className={styles.label}>Velocidad</span>
+        <span id="reading-pace-label" className={styles.label}>Ritmo</span>
         <select
+          aria-labelledby="reading-pace-label"
+          disabled={disabled}
           className={styles.select}
           value={level}
           onChange={handleLevelChange}
           data-testid="reading-controls-level"
         >
-          {LEVEL_OPTIONS.map(({ level: lvl, wpm }) => (
+          {LEVEL_OPTIONS.map((lvl) => (
             <option key={lvl} value={lvl}>
-              {`Nivel ${lvl} - ${wpm} WPM`}
+              {`Nivel ${lvl}`}
             </option>
           ))}
         </select>
       </label>
 
       <label className={styles.control}>
-        <span className={styles.label}>Ancho</span>
+        <span id="reading-width-label" className={styles.label}>Ancho de referencia</span>
         <select
+          aria-labelledby="reading-width-label"
+          disabled={disabled}
           className={styles.select}
           value={widthIdx}
           onChange={handleWidthChange}
           data-testid="reading-controls-width"
         >
           {WIDTH_ENTRIES.map(({ idx, width }) => (
-            <option key={idx} value={idx}>
-              {width} caracteres
+            <option key={idx} value={idx} disabled={combinations && !combinations.some(option => option.widthIdx === idx)}>
+              {referenceWords(width)} palabras · {width} caracteres
             </option>
           ))}
         </select>
       </label>
+      {lineCycles !== undefined && (
+        <label className={styles.control}>
+          <span id="reading-line-cycles-label" className={styles.label}>Ciclos por línea</span>
+          <select aria-labelledby="reading-line-cycles-label" className={styles.select} disabled={disabled}
+            data-testid="reading-controls-line-cycles" value={lineCycles}
+            onChange={(event) => onChange({ book, level, widthIdx, readingLineCycles: Number(event.target.value) })}>
+            {[1, 2, 3].map(count => <option key={count} value={count}
+              disabled={combinations && !combinations.some(option => option.widthIdx === widthIdx && option.lineCycles === count)}>
+              {count} ({count * WIDTH_MAP[widthIdx]} caracteres)</option>)}
+          </select>
+        </label>
+      )}
     </div>
   );
 }

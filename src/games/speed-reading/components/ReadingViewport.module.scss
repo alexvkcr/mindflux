@@ -1,37 +1,15 @@
-﻿@use '../../../styles/variables' as vars;
+@use '../../../styles/variables' as vars;
 
-@keyframes reading-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.viewport {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
+.viewport { display: flex; align-items: center; justify-content: center; width: 100%; min-width: 0; }
 .line {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 1.125rem;
-  font-weight: 600;
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font: inherit;
   text-align: center;
   white-space: nowrap;
-  overflow: hidden;
   color: vars.$text;
-  min-height: 2.5em;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
-  animation: reading-fade-in 160ms ease-out;
+  background: rgba(255, 255, 255, 0.06);
+
+  span { display: block; }
 }

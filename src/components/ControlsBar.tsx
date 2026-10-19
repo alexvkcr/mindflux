@@ -4,6 +4,7 @@ import styles from "./ControlsBar.module.scss";
 import { PrimaryButton } from "./ui/PrimaryButton";
 import { useControlsPortalNode } from "../contexts/controlsPortal";
 import { EYE_MOVEMENT_MAX_LEVEL } from "../games/utils/speed";
+import type { CustomReadingText } from "../games/speed-reading/utils/plainTextFile";
 
 export type CategoryKey = "eyeMovement" | "speedReading" | "visualField" | "reactionTime" | "math" | "memory";
 export type GameKey =
@@ -12,6 +13,7 @@ export type GameKey =
   | "isoRhythm"
   | "fixedReading"
   | "columnReading"
+  | "guidedReading"
   | "doubleNumber"
   | "schulteTable"
   | "schulteContinuous"
@@ -24,7 +26,7 @@ export type GameKey =
   | "hiLoCountCards"
   | "hiLoTable"
   | "digitMemory";
-export type BookKey = "quijote" | "regenta" | "colmena";
+export type BookKey = "quijote" | "regenta" | "colmena" | "custom";
 
 export type ControlsState = {
   category: CategoryKey;
@@ -34,11 +36,13 @@ export type ControlsState = {
   distance?: number;
   book?: BookKey;
   widthIdx?: number;
+  readingLineCycles?: number;
+  customReadingText?: CustomReadingText;
 };
 
 const CATEGORY_GAMES: Record<CategoryKey, GameKey[]> = {
   eyeMovement: ["basic", "isoDistance", "isoRhythm"],
-  speedReading: ["fixedReading", "columnReading"],
+  speedReading: ["fixedReading", "columnReading", "guidedReading"],
   visualField: ["doubleNumber", "schulteTable", "schulteContinuous"],
   reactionTime: ["quickReflex", "quickMath", "grammarMatch"],
   math: ["mathChain", "mentalCount", "hiLoCount", "hiLoCountCards", "hiLoTable"],
@@ -93,7 +97,6 @@ export function ControlsBar(props: {
   const isIsoDistance = effectiveGame === "isoDistance";
   const isIsoRhythm = effectiveGame === "isoRhythm";
   const usesDistanceSelector = isIsoDistance || isIsoRhythm;
-  const isColumnReading = isSpeedReading && effectiveGame === "columnReading";
   const isVisualFieldCategory = state.category === "visualField";
   const isReactionCategory = state.category === "reactionTime";
   const isMathCategory = state.category === "math";
@@ -134,21 +137,6 @@ export function ControlsBar(props: {
         </select>
       </div>
 
-      {isSpeedReading && !isColumnReading && (
-        <div className={styles.control}>
-          <label className={styles.label}>{t.controls.bookLabel}</label>
-          <select
-            className={styles.select}
-            value={state.book || DEFAULT_BOOK}
-            onChange={(e) => onChange({ book: e.target.value as BookKey })}
-          >
-            <option value="quijote">{t.controls.books.quijote}</option>
-            <option value="regenta">{t.controls.books.regenta}</option>
-            <option value="colmena">{t.controls.books.colmena}</option>
-          </select>
-        </div>
-      )}
-
       {usesDistanceSelector && (
         <div className={styles.level}>
           <label className={styles.label}>
@@ -168,7 +156,7 @@ export function ControlsBar(props: {
         </div>
       )}
 
-      {!isColumnReading && !isVisualFieldCategory && !isReactionCategory && !isMathCategory && !isMemoryCategory && (
+      {!isSpeedReading && !isVisualFieldCategory && !isReactionCategory && !isMathCategory && !isMemoryCategory && (
         <div className={styles.level}>
           <label className={styles.label}>
             {t.controls.levelLabel}: {normalizedLevel}
@@ -198,7 +186,7 @@ export function ControlsBar(props: {
         </div>
       )}
 
-      {!isColumnReading && (
+      {!isSpeedReading && (
         <div className={styles.action}>
           {!isMemoryCategory && (
             <div className={styles.actionRow}>

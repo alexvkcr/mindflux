@@ -1,0 +1,63 @@
+@use '../../styles/variables' as vars;
+
+.exercise { width: 100%; min-width: 0; padding: clamp(12px, 3vw, 24px); display: flex; flex-direction: column; gap: 18px; color: vars.$text; }
+.exercise h2 { margin: 0; font-size: 1.2rem; }
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 10px;
+  margin: 0;
+
+  div { padding: 12px; border: 1px solid vars.$border; border-radius: 10px; background: rgba(255, 255, 255, 0.04); }
+  dt { color: vars.$text-dim; font-size: 0.8rem; }
+  dd { margin: 6px 0; font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  small { color: vars.$text-dim; }
+}
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.actions span { color: vars.$text-dim; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.actions button:disabled { opacity: 0.45; cursor: default; }
+.upload { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; }
+.upload p { margin: 0; color: vars.$text-dim; font-size: 0.8rem; line-height: 1.5; }
+.uploadLabel { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0.875rem; min-width: 0; max-width: 100%; }
+.uploadLabel input { max-width: 100%; min-width: 0; font: inherit; }
+.loadedText { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; }
+.loadedText span { overflow-wrap: anywhere; font-size: 0.85rem; }
+.upload p.uploadError { width: 100%; color: #ffb4b4; }
+.hint { margin: 0; color: vars.$text-dim; font-size: 0.9rem; line-height: 1.6; }
+.board { min-width: 0; padding: 12px; border: 1px solid vars.$border; border-radius: 12px; background: rgba(0, 0, 0, 0.18); }
+.stage { width: 100%; min-width: 0; }
+.fixedStage { display: flex; align-items: center; min-height: 180px; }
+.columnStage { height: clamp(240px, 52dvh, 540px); }
+.info {
+  padding: 14px;
+  border: 1px solid vars.$border;
+  border-radius: 10px;
+  line-height: 1.65;
+  color: vars.$text-dim;
+  font-size: 0.9rem;
+
+  summary { color: vars.$text; cursor: pointer; font-weight: 600; }
+  p { margin: 12px 0 0; }
+  strong { color: vars.$text; }
+}
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+
+  figure { flex: 1 1 210px; min-width: 0; margin: 0; padding: 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.04); }
+  code { color: vars.$text; white-space: pre-wrap; overflow-wrap: anywhere; }
+  figcaption { margin-top: 8px; font-size: 0.8rem; }
+}
+.exercise :focus-visible { outline: 2px solid vars.$primary; outline-offset: 3px; }
+
+@media (max-width: 600px) {
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .metrics > div:last-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 480px) {
+  .exercise { padding: 12px 8px; gap: 14px; }
+  .board { padding: 8px 4px; }
+}
