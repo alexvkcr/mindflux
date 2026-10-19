@@ -1,0 +1,70 @@
+@use '../../../styles/variables' as vars;
+
+.container { width: 100%; min-width: 0; padding: 24px; color: vars.$text; overflow-x: hidden; }
+.header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.header h2 { margin: 0; font-size: 1.3rem; }
+.badge { padding: 6px 12px; border: 1px solid vars.$border; border-radius: 999px; color: vars.$text-dim; font-size: .8rem; }
+.instructions { max-width: 62ch; margin: 16px 0 20px; color: vars.$text-dim; line-height: 1.55; }
+.levelControl { display: grid; gap: 6px; max-width: 380px; margin-bottom: 18px; color: vars.$text-dim; font-size: .85rem; }
+.levelControl select {
+  min-width: 0; width: 100%; min-height: 44px; padding: 8px 10px;
+  border: 1px solid vars.$border; border-radius: 8px;
+  background: vars.$bg-1; color: vars.$text; font: inherit; font-size: .95rem;
+}
+.levelControl select:disabled { opacity: .6; }
+.board {
+  display: grid; place-items: center; min-width: 0; min-height: 350px;
+  padding: 24px 14px; border: 1px solid vars.$border;
+  border-radius: vars.$radius; background: rgba(0, 0, 0, .18);
+}
+.panel, .answerForm, .correction, .summary {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 16px; width: 100%; min-width: 0; text-align: center;
+}
+.panel p, .answerForm p, .correction p, .summary p { margin: 0; }
+.eyebrow { color: vars.$text-dim; font-size: .85rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.categoryList { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.categoryList li { padding: 8px 12px; border: 1px solid vars.$border; border-radius: 999px; background: rgba(255,255,255,.06); }
+.stimulus {
+  display: grid; place-items: center; width: 100%; min-height: 180px;
+  padding: 14px; border: 1px solid rgba(255,255,255,.16); border-radius: 16px;
+  background: rgba(255,255,255,.06); font-size: clamp(2rem, 7vw, 3.5rem);
+  font-weight: 700; line-height: 1.15; overflow-wrap: anywhere;
+}
+.primary, .secondary, .restart {
+  min-height: 48px; padding: 10px 18px; border: 1px solid #69c2ff;
+  border-radius: 9px; background: #166ca5; color: #fff;
+  font: inherit; font-weight: 700; cursor: pointer; touch-action: manipulation;
+}
+.secondary { background: vars.$bg-2; border-color: vars.$border; }
+.restart { display: block; margin: 16px auto 0; background: transparent; border-color: vars.$border; font-size: .88rem; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; }
+.fields label { display: grid; gap: 6px; min-width: 0; text-align: left; font-weight: 650; }
+.fields input {
+  min-width: 0; width: 100%; min-height: 48px; padding: 10px 12px;
+  border: 1px solid vars.$border; border-radius: 9px; background: vars.$bg-1;
+  color: vars.$text; font: inherit; font-size: 1rem;
+}
+.correction h3, .summary h3 { margin: 0; }
+.answerRows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: 100%; text-align: left; }
+.answerRows > div { display: grid; gap: 5px; min-width: 0; padding: 12px; border: 1px solid vars.$border; border-radius: 9px; overflow-wrap: anywhere; }
+.correct { background: rgba(58,190,112,.17); }
+.incorrect { background: rgba(237,87,87,.17); }
+.score { color: #8bd0ff; font-size: 2.8rem; font-weight: 800; }
+.resultList { display: grid; gap: 8px; width: 100%; max-height: 450px; overflow-y: auto; text-align: left; }
+.resultList details { min-width: 0; border: 1px solid vars.$border; border-radius: 9px; }
+.resultList summary { padding: 11px; cursor: pointer; font-weight: 650; }
+.roundDetail { padding: 0 12px 12px; overflow-wrap: anywhere; }
+.roundDetail h4 { margin: 16px 0 8px; }
+.roundDetail p { margin: 4px 0; }
+.roundDetail ol { display: grid; gap: 5px; padding-left: 26px; }
+.roundDetail li { padding-left: 3px; }
+.roundDetail li span { display: inline-block; min-width: 135px; color: vars.$text-dim; }
+.container :focus-visible { outline: 3px solid vars.$primary; outline-offset: 3px; }
+
+@media (max-width: 480px) {
+  .container { padding: 14px; }
+  .board { padding: 20px 10px; min-height: 310px; }
+  .fields, .answerRows { grid-template-columns: minmax(0, 1fr); }
+  .roundDetail li span { min-width: 0; margin-right: 8px; }
+}

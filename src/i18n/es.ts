@@ -38,7 +38,8 @@
       hiLoCountCards: "Conteo Hi-Lo con cartas reales",
       hiLoTable: "Mesa Hi-Lo",
       digitMemory: "Memoria de d\u00edgitos",
-      runningSpan: "Ventana de memoria"
+      runningSpan: "Ventana de memoria",
+      keepTrack: "Seguimiento por categorías"
     },
     bookLabel: "Texto",
     books: {

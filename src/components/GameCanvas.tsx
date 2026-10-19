@@ -16,6 +16,7 @@ import { ConteoHiLo, ConteoHiLoConCartas } from "../games/math/ConteoHiLo";
 import { MesaHiLo } from "../games/math/MesaHiLo";
 import { MemoryGame } from "../games/memory/MemoryGame";
 import { RunningSpan } from "../games/memory/RunningSpan/RunningSpan";
+import { KeepTrack } from "../games/memory/KeepTrack/KeepTrack";
 import styles from "./GameCanvas.module.scss";
 
 export function GameCanvas({
@@ -200,6 +201,9 @@ export function GameCanvas({
         )}
         {controls.category === "memory" && controls.game === "runningSpan" && (
           <RunningSpan />
+        )}
+        {controls.category === "memory" && controls.game === "keepTrack" && (
+          <KeepTrack />
         )}
       </div>
     </section>
