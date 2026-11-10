@@ -300,7 +300,7 @@ export function SchulteTable({ running, onTimeout, continuous = false }: Props) 
               {phase === "playing" && <div className={styles.grid} style={gridStyle}>
                 {cells.map((cell) => <button key={cell.id} type="button" className={styles.cell}
                   disabled={sequence.indexOf(cell.value) < targetIndex} data-wrong={mistakeValue === cell.value}
-                  onClick={() => handleCellPress(cell)} aria-label={`Elemento ${cell.value}`}>{cell.value}</button>)}
+                  onClick={() => handleCellPress(cell)} aria-label={`Elemento ${cell.value}`}><span className={styles.cellText}>{cell.value}</span></button>)}
               </div>}
             </div>
           </div>

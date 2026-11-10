@@ -153,6 +153,15 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+
+/* Scale text with each cell's available width and height. */
+.cellText { white-space: nowrap; }
+
+@supports (container-type: size) {
+  .cell { container-type: size; }
+  .cellText { font-size: clamp(0.875rem, min(44cqw, 60cqh), 3.5rem); }
+}
+
 .cell:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); }
 .cell:active:not(:disabled) { background: rgba(92, 230, 155, 0.2); }
 .cell:disabled { opacity: 0.28; cursor: default; background: rgba(92, 230, 155, 0.12); }
