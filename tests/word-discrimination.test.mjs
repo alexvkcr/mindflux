@@ -1,77 +1,89 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { WORDS, createDifferent, createSession, evaluate, exposureForLevel, summarize, transformWord } from '../src/games/campo-visual/WordDiscrimination/stimuli.ts';
+import { WORDS_BY_SYLLABLES, SYLLABLE_COUNTS, WORDS, CHANGE_KINDS, CHALLENGES, EXPOSURE_MS, SESSION_LENGTHS, WORD_DISTANCES, DEFAULT_CONFIG, createDifferent, createSession, evaluate, summarize, transformWord } from '../src/games/campo-visual/WordDiscrimination/stimuli.ts';
 
 function seeded(seed) {
   let state = seed >>> 0;
   return () => ((state = (1664525 * state + 1013904223) >>> 0) / 4294967296);
 }
 
-test('corpus is local, varied, unique and normalized', () => {
-  assert.ok(WORDS.length >= 100);
+test('curated corpus contains at least 40 unique normalized words per syllable count', () => {
   assert.equal(new Set(WORDS).size, WORDS.length);
-  assert.ok(WORDS.some((word) => word.length <= 5));
-  assert.ok(WORDS.some((word) => word.length >= 12));
-  WORDS.forEach((word) => assert.equal(word, word.normalize('NFC')));
-});
-
-test('each transformation really changes the displayed string', () => {
-  for (const kind of ['substitution', 'transposition', 'insertion', 'deletion', 'accent']) {
-    const source = 'camino';
-    const changed = transformWord(source, kind, 4, seeded(5));
-    assert.notEqual(changed, source, kind);
-    assert.equal(changed, changed.normalize('NFC'));
+  for (const count of SYLLABLE_COUNTS) {
+    const pool = WORDS_BY_SYLLABLES[count];
+    assert.ok(pool.length >= 40, String(count));
+    pool.forEach(word => assert.equal(word, word.normalize('NFC')));
   }
-  assert.equal(transformWord('canto', 'transposition', 9, () => 0).length, 5);
-  assert.notEqual(transformWord('canto', 'transposition', 9, () => 0), 'canto');
 });
 
-test('early double changes affect two distinct positions', () => {
-  const pair = createDifferent('camino', 1, () => 0);
-  assert.equal(pair.change, 'double');
-  assert.equal([...pair.left].filter((letter, i) => letter !== pair.right[i]).length, 2);
+test('exposures, lengths, distances and defaults match independent settings', () => {
+  assert.deepEqual(EXPOSURE_MS, [1600,1400,1200,1000,850,700,650,600,550,500,450,400,350]);
+  assert.deepEqual(SESSION_LENGTHS, [10,20,30,40]);
+  assert.deepEqual(WORD_DISTANCES, [8,16,32,64,96]);
+  assert.deepEqual(DEFAULT_CONFIG, { exposureMs:1600, comparisons:10, syllables:3, challenge:'all', distance:32 });
 });
 
-test('sessions have exact halves and limited word reuse at every level', () => {
-  for (let level = 1; level <= 9; level++) {
-    for (const length of [20, 40, 60]) {
-      const rounds = createSession(level, length, seeded(level * 100 + length));
-      assert.equal(rounds.length, length);
-      assert.equal(rounds.filter((round) => round.answer === 'same').length, length / 2);
-      assert.equal(rounds.filter((round) => round.answer === 'different').length, length / 2);
-      assert.ok(new Set(rounds.map((round) => round.left)).size >= Math.min(20, length));
-      rounds.forEach((round) => {
-        assert.equal(round.left === round.right, round.answer === 'same');
-        assert.equal(round.left, round.left.normalize('NFC'));
-        assert.equal(round.right, round.right.normalize('NFC'));
-        if (level >= 7) {
-          assert.equal(round.left.length, round.right.length);
-          if (round.answer === 'different' && round.change !== 'accent') {
-            assert.equal(round.left[0], round.right[0]);
-            assert.equal(round.left.at(-1), round.right.at(-1));
-          }
-        }
-      });
+test('all seven individual transformations change every corpus word', () => {
+  for (const word of WORDS) for (const kind of CHANGE_KINDS) {
+    const changed = transformWord(word, kind, seeded(5));
+    assert.notEqual(changed, word, word + ' ' + kind);
+    assert.equal(changed, changed.normalize('NFC'));
+    if (kind === 'insertion') assert.equal(changed.length, word.length + 1);
+    else if (kind === 'deletion') assert.equal(changed.length, word.length - 1);
+    else {
+      assert.equal(changed.length, word.length);
+      const differences = [...word].filter((letter, i) => letter !== changed[i]).length;
+      assert.equal(differences, ['double','transposition'].includes(kind) ? 2 : 1);
+      if (kind === 'transposition') assert.equal([...word].sort().join(''), [...changed].sort().join(''));
+      if (kind === 'accent') assert.equal(word.normalize('NFD').replace(/\u0301/g,''), changed.normalize('NFD').replace(/\u0301/g,''));
+    }
+    const pair = createDifferent(word, kind, seeded(6));
+    assert.deepEqual(pair.changes, [kind]);
+    assert.notEqual(pair.left, pair.right);
+  }
+});
+
+test('all challenge contains every single transformation and mixes distinct changes including substitution plus transposition', () => {
+  const random = seeded(42);
+  const singles = new Set();
+  let mixed = 0, substitutionAndTransposition = 0;
+  for (let i = 0; i < 3000; i++) {
+    const pair = createDifferent('camino', 'all', random);
+    assert.notEqual(pair.left, pair.right);
+    if (pair.change === 'mixed') {
+      mixed++;
+      assert.equal(new Set(pair.changes).size, 2);
+      if (pair.changes.includes('substitution') && pair.changes.includes('transposition')) substitutionAndTransposition++;
+    } else singles.add(pair.change);
+  }
+  assert.deepEqual([...singles].sort(), [...CHANGE_KINDS].sort());
+  assert.ok(mixed > 0);
+  assert.ok(substitutionAndTransposition > 0);
+});
+
+test('sessions are balanced with no repeated base words across all configuration combinations', () => {
+  for (const syllables of SYLLABLE_COUNTS) for (const comparisons of SESSION_LENGTHS) for (const challenge of CHALLENGES) {
+    const config = { ...DEFAULT_CONFIG, syllables, comparisons, challenge };
+    const rounds = createSession(config, seeded(syllables * 100 + comparisons));
+    assert.equal(rounds.length, comparisons);
+    assert.equal(rounds.filter(round => round.answer === 'same').length, comparisons / 2);
+    assert.equal(new Set(rounds.map(round => round.left)).size, comparisons);
+    for (const round of rounds) {
+      assert.ok(WORDS_BY_SYLLABLES[syllables].includes(round.left));
+      assert.equal(round.left === round.right, round.answer === 'same');
+      if (round.answer === 'different' && challenge !== 'all') assert.deepEqual(round.changes, [challenge]);
     }
   }
 });
-
-test('levels shorten exposure and increase word length', () => {
-  assert.deepEqual(Array.from({ length: 9 }, (_, i) => exposureForLevel(i + 1)), [2000, 1600, 1200, 1000, 850, 700, 600, 500, 400]);
-  assert.ok(createSession(1, 20, seeded(1)).every((round) => round.left.length <= 6));
-  assert.ok(createSession(5, 20, seeded(1)).every((round) => round.left.length >= 6 && round.left.length <= 9));
-  assert.ok(createSession(9, 20, seeded(1)).every((round) => round.left.length >= 10));
+test('exposure and separation do not change generated stimuli', () => {
+  const first = createSession(DEFAULT_CONFIG, seeded(123));
+  for (const exposureMs of EXPOSURE_MS) for (const distance of WORD_DISTANCES) {
+    assert.deepEqual(createSession({ ...DEFAULT_CONFIG, exposureMs, distance }, seeded(123)), first);
+  }
 });
-
 test('evaluation keeps both error types separate and reveals missed pairs', () => {
-  const same = { left: 'casa', right: 'casa', answer: 'same', change: null };
-  const different = createDifferent('camino', 4, seeded(8));
-  const results = [evaluate(same, 'different'), evaluate(different, 'same'), evaluate(same, 'same')];
-  assert.deepEqual(summarize(results), {
-    hits: 1,
-    differentAsSame: 1,
-    sameAsDifferent: 1,
-    accuracy: 33,
-    misses: results.slice(0, 2)
-  });
+  const same = { left:'casa', right:'casa', answer:'same', change:null, changes:[] };
+  const different = createDifferent('camino', 'substitution', seeded(8));
+  const results = [evaluate(same,'different'), evaluate(different,'same'), evaluate(same,'same')];
+  assert.deepEqual(summarize(results), { hits:1, differentAsSame:1, sameAsDifferent:1, accuracy:33, misses:results.slice(0,2) });
 });

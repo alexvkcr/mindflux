@@ -1,13 +1,19 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createSession, evaluate, exposureForLevel, summarize, type Judgment, type ResponseResult, type Stimulus } from "./stimuli";
+import { createSession, evaluate, summarize, DEFAULT_CONFIG, EXPOSURE_MS, SESSION_LENGTHS, SYLLABLE_COUNTS, CHALLENGES, WORD_DISTANCES, type Challenge, type SessionConfig, type Judgment, type ResponseResult, type Stimulus } from "./stimuli";
 import styles from "./WordDiscrimination.module.scss";
 
 type Phase = "idle" | "exposure" | "answer" | "feedback" | "finished";
+const CHALLENGE_LABELS: Record<Challenge, string> = {
+  substitution: "Letra distinta", transposition: "Desorden", accent: "Acentuación",
+  deletion: "Omisión", insertion: "Inserción", double: "Alteración doble",
+  similar: "Letras visualmente similares", all: "Todas"
+};
 
 export function WordDiscrimination({ running, onTimeout }: { running: boolean; onTimeout: () => void }) {
-  const [level, setLevel] = useState(1);
-  const [length, setLength] = useState<20 | 40 | 60>(20);
-  const [sessionLevel, setSessionLevel] = useState(1);
+  const [config, setConfig] = useState<SessionConfig>(DEFAULT_CONFIG);
+  const [sessionConfig, setSessionConfig] = useState<SessionConfig>(DEFAULT_CONFIG);
+  const pairRef = useRef<HTMLDivElement>(null);
+  const displayConfig = running ? sessionConfig : config;
   const [phase, setPhase] = useState<Phase>("idle");
   const [index, setIndex] = useState(0);
   const [session, setSession] = useState<Stimulus[]>([]);
@@ -25,8 +31,8 @@ export function WordDiscrimination({ running, onTimeout }: { running: boolean; o
   useEffect(() => {
     if (running) {
       window.clearTimeout(timerRef.current);
-      setSession(createSession(level, length));
-      setSessionLevel(level);
+      setSession(createSession(config));
+      setSessionConfig(config);
       setIndex(0);
       setResults([]);
       changePhase("exposure");
@@ -41,9 +47,30 @@ export function WordDiscrimination({ running, onTimeout }: { running: boolean; o
 
   useLayoutEffect(() => {
     if (phase !== "exposure" || !current || !running) return;
-    timerRef.current = window.setTimeout(() => changePhase("answer"), exposureForLevel(sessionLevel));
+    timerRef.current = window.setTimeout(() => changePhase("answer"), sessionConfig.exposureMs);
     return () => window.clearTimeout(timerRef.current);
-  }, [phase, current, sessionLevel, running, changePhase]);
+  }, [phase, current, sessionConfig.exposureMs, running, changePhase]);
+
+  // Measure the actual glyph widths so the pair stays on one line even on narrow phones.
+  useLayoutEffect(() => {
+    const pair = pairRef.current;
+    if (!pair) return;
+    const fit = () => {
+      pair.style.removeProperty("--word-font-size");
+      const words = Array.from(pair.querySelectorAll<HTMLElement>("[data-word]"));
+      const style = window.getComputedStyle(pair);
+      const available = pair.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - parseFloat(style.columnGap);
+      const total = words.reduce((width, word) => width + word.getBoundingClientRect().width, 0);
+      if (total > available && available > 0) {
+        const baseSize = parseFloat(window.getComputedStyle(words[0]).fontSize);
+        pair.style.setProperty("--word-font-size", Math.max(1, baseSize * available / total * 0.98) + "px");
+      }
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(pair);
+    return () => observer.disconnect();
+  }, [phase, current, displayConfig.distance]);
 
   const respond = useCallback((judgment: Judgment) => {
     if (phaseRef.current !== "answer" || !current || !running) return;
@@ -78,26 +105,40 @@ export function WordDiscrimination({ running, onTimeout }: { running: boolean; o
     </header>
 
     <div className={styles.settings}>
-      <label>Nivel
-        <select value={level} disabled={running} onChange={(event) => setLevel(Number(event.target.value))}>
-          {Array.from({ length: 9 }, (_, i) => <option key={i + 1} value={i + 1}>Nivel {i + 1}</option>)}
-        </select>
-      </label>
       <label>Comparaciones
-        <select value={length} disabled={running} onChange={(event) => setLength(Number(event.target.value) as 20 | 40 | 60)}>
-          <option value={20}>20</option><option value={40}>40</option><option value={60}>60</option>
+        <select value={config.comparisons} disabled={running} onChange={event => setConfig(previous => ({ ...previous, comparisons: Number(event.target.value) as SessionConfig["comparisons"] }))}>
+          {SESSION_LENGTHS.map(value => <option key={value} value={value}>{value}</option>)}
         </select>
       </label>
-      <span className={styles.detail}>Exposición: {exposureForLevel(level).toLocaleString("es-ES")} ms</span>
+      <label>Exposición
+        <select value={config.exposureMs} disabled={running} onChange={event => setConfig(previous => ({ ...previous, exposureMs: Number(event.target.value) as SessionConfig["exposureMs"] }))}>
+          {EXPOSURE_MS.map(value => <option key={value} value={value}>{value.toLocaleString("es-ES")} ms</option>)}
+        </select>
+      </label>
+      <label>Longitud
+        <select value={config.syllables} disabled={running} onChange={event => setConfig(previous => ({ ...previous, syllables: Number(event.target.value) as SessionConfig["syllables"] }))}>
+          {SYLLABLE_COUNTS.map(value => <option key={value} value={value}>{value} sílabas</option>)}
+        </select>
+      </label>
+      <label>Reto
+        <select value={config.challenge} disabled={running} onChange={event => setConfig(previous => ({ ...previous, challenge: event.target.value as Challenge }))}>
+          {CHALLENGES.map(value => <option key={value} value={value}>{CHALLENGE_LABELS[value]}</option>)}
+        </select>
+      </label>
+      <label>Separación
+        <select value={config.distance} disabled={running} onChange={event => setConfig(previous => ({ ...previous, distance: Number(event.target.value) as SessionConfig["distance"] }))}>
+          {WORD_DISTANCES.map(value => <option key={value} value={value}>{value} px</option>)}
+        </select>
+      </label>
     </div>
 
     {phase !== "finished" && <>
       <div className={styles.progress} aria-live="polite">
         {phase === "idle" ? "Pulsa Arranque para comenzar" : `Comparación ${index + 1} de ${session.length}`}
       </div>
-      <div className={styles.pair} aria-label={phase === "exposure" ? "Palabras visibles" : "Palabras ocultas"}>
-        <div className={styles.word} aria-label="Primera palabra">{phase === "exposure" ? current?.left : "••••••"}</div>
-        <div className={styles.word} aria-label="Segunda palabra">{phase === "exposure" ? current?.right : "••••••"}</div>
+      <div ref={pairRef} className={styles.pair} style={{ columnGap: displayConfig.distance }} aria-label={phase === "exposure" ? "Palabras visibles" : "Palabras ocultas"}>
+        <span data-word className={styles.word} aria-label="Primera palabra">{phase === "exposure" ? current?.left : "••••••"}</span>
+        <span data-word className={styles.word} aria-label="Segunda palabra">{phase === "exposure" ? current?.right : "••••••"}</span>
       </div>
       <p className={styles.instruction} aria-live="polite">
         {phase === "exposure" ? "Observa las dos palabras" : phase === "answer" ? "¿Eran iguales o diferentes?" : phase === "feedback"
@@ -120,7 +161,7 @@ export function WordDiscrimination({ running, onTimeout }: { running: boolean; o
         <p><strong>{metrics.differentAsSame}</strong><span>Diferentes juzgadas iguales</span></p>
         <p><strong>{metrics.sameAsDifferent}</strong><span>Iguales juzgadas diferentes</span></p>
       </div>
-      <p>Nivel {sessionLevel} · Exposición {exposureForLevel(sessionLevel).toLocaleString("es-ES")} ms</p>
+      <p>Exposición {sessionConfig.exposureMs.toLocaleString("es-ES")} ms · {sessionConfig.syllables} sílabas · {CHALLENGE_LABELS[sessionConfig.challenge]} · {sessionConfig.distance} px · {sessionConfig.comparisons} comparaciones</p>
       {metrics.misses.length > 0 && <div className={styles.misses}>
         <h4>Pares fallados</h4>
         <ul>{metrics.misses.map((result, i) => <li key={i}>{result.left} / {result.right} — eran {result.answer === "same" ? "iguales" : "diferentes"}</li>)}</ul>
