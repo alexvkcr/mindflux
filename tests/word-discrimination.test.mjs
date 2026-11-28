@@ -17,7 +17,7 @@ test('curated corpus contains at least 40 unique normalized words per syllable c
 });
 
 test('exposures, lengths, distances and defaults match independent settings', () => {
-  assert.deepEqual(EXPOSURE_MS, [1600,1400,1200,1000,850,700,650,600,550,500,450,400,350]);
+  assert.deepEqual(EXPOSURE_MS, [1600,1400,1200,1000,850,700,650,600,550,500,450,400,350,325,300,290,280,270,260,250]);
   assert.deepEqual(SESSION_LENGTHS, [10,20,30,40]);
   assert.deepEqual(WORD_DISTANCES, [8,16,32,64,96]);
   assert.deepEqual(DEFAULT_CONFIG, { exposureMs:1600, comparisons:10, syllables:3, challenge:'all', distance:32 });

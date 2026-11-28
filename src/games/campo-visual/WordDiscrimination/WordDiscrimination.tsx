@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createSession, evaluate, summarize, DEFAULT_CONFIG, EXPOSURE_MS, SESSION_LENGTHS, SYLLABLE_COUNTS, CHALLENGES, WORD_DISTANCES, type Challenge, type SessionConfig, type Judgment, type ResponseResult, type Stimulus } from "./stimuli";
+import { CountdownSemaphore } from "../../reaction/components/CountdownSemaphore";
 import styles from "./WordDiscrimination.module.scss";
 
-type Phase = "idle" | "exposure" | "answer" | "feedback" | "finished";
+type Phase = "idle" | "countdown" | "exposure" | "answer" | "feedback" | "finished";
+const EXPOSURE_GROUPS = [
+  { label: "Lenta", values: EXPOSURE_MS.filter(ms => ms >= 700) },
+  { label: "Rápida", values: EXPOSURE_MS.filter(ms => ms >= 400 && ms < 700) },
+  { label: "Muy rápida", values: EXPOSURE_MS.filter(ms => ms >= 300 && ms < 400) },
+  { label: "Extrema", values: EXPOSURE_MS.filter(ms => ms < 300) }
+];
 const CHALLENGE_LABELS: Record<Challenge, string> = {
   substitution: "Letra distinta", transposition: "Desorden", accent: "Acentuación",
   deletion: "Omisión", insertion: "Inserción", double: "Alteración doble",
@@ -15,6 +22,7 @@ export function WordDiscrimination({ running, onTimeout }: { running: boolean; o
   const pairRef = useRef<HTMLDivElement>(null);
   const displayConfig = running ? sessionConfig : config;
   const [phase, setPhase] = useState<Phase>("idle");
+  const [countdownStage, setCountdownStage] = useState(3);
   const [index, setIndex] = useState(0);
   const [session, setSession] = useState<Stimulus[]>([]);
   const [results, setResults] = useState<ResponseResult[]>([]);
@@ -35,7 +43,8 @@ export function WordDiscrimination({ running, onTimeout }: { running: boolean; o
       setSessionConfig(config);
       setIndex(0);
       setResults([]);
-      changePhase("exposure");
+      setCountdownStage(3);
+      changePhase("countdown");
     } else if (phaseRef.current !== "finished") {
       window.clearTimeout(timerRef.current);
       changePhase("idle");
@@ -44,6 +53,18 @@ export function WordDiscrimination({ running, onTimeout }: { running: boolean; o
     // Configuration changes are disabled while running; only the start/stop signal starts a session.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running, changePhase]);
+
+  useEffect(() => {
+    if (!running || phase !== "countdown") return;
+    const timeout = window.setTimeout(() => {
+      if (countdownStage > 1) setCountdownStage(countdownStage - 1);
+      else {
+        setCountdownStage(0);
+        changePhase("exposure");
+      }
+    }, 1000);
+    return () => window.clearTimeout(timeout);
+  }, [running, phase, countdownStage, changePhase]);
 
   useLayoutEffect(() => {
     if (phase !== "exposure" || !current || !running) return;
@@ -58,6 +79,7 @@ export function WordDiscrimination({ running, onTimeout }: { running: boolean; o
     const fit = () => {
       pair.style.removeProperty("--word-font-size");
       const words = Array.from(pair.querySelectorAll<HTMLElement>("[data-word]"));
+      if (!words.length) return;
       const style = window.getComputedStyle(pair);
       const available = pair.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - parseFloat(style.columnGap);
       const total = words.reduce((width, word) => width + word.getBoundingClientRect().width, 0);
@@ -112,7 +134,9 @@ export function WordDiscrimination({ running, onTimeout }: { running: boolean; o
       </label>
       <label>Exposición
         <select value={config.exposureMs} disabled={running} onChange={event => setConfig(previous => ({ ...previous, exposureMs: Number(event.target.value) as SessionConfig["exposureMs"] }))}>
-          {EXPOSURE_MS.map(value => <option key={value} value={value}>{value.toLocaleString("es-ES")} ms</option>)}
+          {EXPOSURE_GROUPS.map(group => <optgroup key={group.label} label={group.label}>
+            {group.values.map(value => <option key={value} value={value}>{value.toLocaleString("es-ES")} ms</option>)}
+          </optgroup>)}
         </select>
       </label>
       <label>Longitud
@@ -134,14 +158,16 @@ export function WordDiscrimination({ running, onTimeout }: { running: boolean; o
 
     {phase !== "finished" && <>
       <div className={styles.progress} aria-live="polite">
-        {phase === "idle" ? "Pulsa Arranque para comenzar" : `Comparación ${index + 1} de ${session.length}`}
+        {phase === "idle" ? "Pulsa Arranque para comenzar" : phase === "countdown" ? `Empieza en ${countdownStage}` : `Comparación ${index + 1} de ${session.length}`}
       </div>
       <div ref={pairRef} className={styles.pair} style={{ columnGap: displayConfig.distance }} aria-label={phase === "exposure" ? "Palabras visibles" : "Palabras ocultas"}>
-        <span data-word className={styles.word} aria-label="Primera palabra">{phase === "exposure" ? current?.left : "••••••"}</span>
-        <span data-word className={styles.word} aria-label="Segunda palabra">{phase === "exposure" ? current?.right : "••••••"}</span>
+        {phase === "countdown" ? <CountdownSemaphore stage={countdownStage} /> : <>
+          <span data-word className={styles.word} aria-label="Primera palabra">{phase === "exposure" ? current?.left : "••••••"}</span>
+          <span data-word className={styles.word} aria-label="Segunda palabra">{phase === "exposure" ? current?.right : "••••••"}</span>
+        </>}
       </div>
       <p className={styles.instruction} aria-live="polite">
-        {phase === "exposure" ? "Observa las dos palabras" : phase === "answer" ? "¿Eran iguales o diferentes?" : phase === "feedback"
+        {phase === "countdown" ? "Prepárate" : phase === "exposure" ? "Observa las dos palabras" : phase === "answer" ? "¿Eran iguales o diferentes?" : phase === "feedback"
           ? results.at(-1)?.correct ? "Correcto" : "Incorrecto" : "Las palabras desaparecerán antes de responder"}
       </p>
       <div className={styles.actions}>
