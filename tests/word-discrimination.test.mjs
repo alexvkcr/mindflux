@@ -40,6 +40,8 @@ test('all seven individual transformations change every corpus word', () => {
     const pair = createDifferent(word, kind, seeded(6));
     assert.deepEqual(pair.changes, [kind]);
     assert.notEqual(pair.left, pair.right);
+    assert.ok(['left', 'right'].includes(pair.alteredSide));
+    assert.equal(pair.alteredSide === 'left' ? pair.right : pair.left, word);
   }
 });
 
@@ -61,15 +63,31 @@ test('all challenge contains every single transformation and mixes distinct chan
   assert.ok(substitutionAndTransposition > 0);
 });
 
+test('every challenge randomly places the alteration on either side', () => {
+  for (const challenge of CHALLENGES) {
+    const random = seeded(80);
+    let left = 0;
+    for (let i = 0; i < 1000; i++) {
+      const pair = createDifferent('camino', challenge, random);
+      assert.notEqual(pair.left, pair.right);
+      assert.equal(pair.alteredSide === 'left' ? pair.right : pair.left, 'camino');
+      if (pair.alteredSide === 'left') left++;
+    }
+    assert.ok(left > 400 && left < 600, challenge + ': ' + left);
+  }
+});
+
 test('sessions are balanced with no repeated base words across all configuration combinations', () => {
   for (const syllables of SYLLABLE_COUNTS) for (const comparisons of SESSION_LENGTHS) for (const challenge of CHALLENGES) {
     const config = { ...DEFAULT_CONFIG, syllables, comparisons, challenge };
     const rounds = createSession(config, seeded(syllables * 100 + comparisons));
     assert.equal(rounds.length, comparisons);
     assert.equal(rounds.filter(round => round.answer === 'same').length, comparisons / 2);
-    assert.equal(new Set(rounds.map(round => round.left)).size, comparisons);
+    assert.equal(new Set(rounds.map(round => round.alteredSide === 'left' ? round.right : round.left)).size, comparisons);
     for (const round of rounds) {
-      assert.ok(WORDS_BY_SYLLABLES[syllables].includes(round.left));
+      const original = round.alteredSide === 'left' ? round.right : round.left;
+      assert.ok(WORDS_BY_SYLLABLES[syllables].includes(original));
+      assert.equal(round.alteredSide === null, round.answer === 'same');
       assert.equal(round.left === round.right, round.answer === 'same');
       if (round.answer === 'different' && challenge !== 'all') assert.deepEqual(round.changes, [challenge]);
     }
@@ -82,7 +100,7 @@ test('exposure and separation do not change generated stimuli', () => {
   }
 });
 test('evaluation keeps both error types separate and reveals missed pairs', () => {
-  const same = { left:'casa', right:'casa', answer:'same', change:null, changes:[] };
+  const same = { left:'casa', right:'casa', answer:'same', change:null, changes:[], alteredSide:null };
   const different = createDifferent('camino', 'substitution', seeded(8));
   const results = [evaluate(same,'different'), evaluate(different,'same'), evaluate(same,'same')];
   assert.deepEqual(summarize(results), { hits:1, differentAsSame:1, sameAsDifferent:1, accuracy:33, misses:results.slice(0,2) });

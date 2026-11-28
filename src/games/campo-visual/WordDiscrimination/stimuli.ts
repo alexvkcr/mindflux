@@ -28,6 +28,7 @@ export interface Stimulus {
   answer: Judgment;
   change: ChangeKind | "mixed" | null;
   changes: ChangeKind[];
+  alteredSide: "left" | "right" | null;
 }
 export interface ResponseResult extends Stimulus {
   response: Judgment;
@@ -88,6 +89,11 @@ export function transformWord(word: string, kind: ChangeKind, random: () => numb
 
 export function createDifferent(word: string, challenge: Challenge, random: () => number = Math.random): Stimulus {
   const left = word.normalize("NFC");
+  // Pick the altered side independently for every different pair, after generating the alteration.
+  const pair = (right: string, change: ChangeKind | "mixed", changes: ChangeKind[]): Stimulus =>
+    random() < 0.5
+      ? { left: right, right: left, answer: "different", change, changes, alteredSide: "left" }
+      : { left, right, answer: "different", change, changes, alteredSide: "right" };
   const kinds = challenge === "all" ? shuffle([...CHANGE_KINDS], random) : [challenge];
   for (const kind of kinds) {
     const first = transformWord(left, kind, random);
@@ -100,11 +106,11 @@ export function createDifferent(word: string, challenge: Challenge, random: () =
           // For equal-length operations, keep their affected positions distinct so neither masks the other.
           if (first.length === left.length && right.length === first.length &&
               [...left].some((letter, i) => letter !== first[i] && first[i] !== right[i])) continue;
-          return { left, right, answer: "different", change: "mixed", changes: [kind, second] };
+          return pair(right, "mixed", [kind, second]);
         }
       }
     }
-    return { left, right: first, answer: "different", change: kind, changes: [kind] };
+    return pair(first, kind, [kind]);
   }
   throw new Error("No eligible transformation for " + left + " (" + challenge + ")");
 }
@@ -115,7 +121,7 @@ export function createSession(config: SessionConfig, random: () => number = Math
   const words = shuffle([...pool], random).slice(0, config.comparisons);
   const answers = shuffle(Array.from({ length: config.comparisons }, (_, i): Judgment => i < config.comparisons / 2 ? "same" : "different"), random);
   return answers.map((answer, i) => answer === "same"
-    ? { left: words[i], right: words[i], answer, change: null, changes: [] }
+    ? { left: words[i], right: words[i], answer, change: null, changes: [], alteredSide: null }
     : createDifferent(words[i], config.challenge, random));
 }
 export function evaluate(stimulus: Stimulus, response: Judgment): ResponseResult {
